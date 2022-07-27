@@ -2,9 +2,7 @@ import { AbstractExecutorErgo } from "./extractorErgo";
 import { loadDataBase, observationTxGenerator } from "./utils.mock";
 import { ObservationEntity } from "../entities/observationEntity";
 
-class ExecutorErgo extends AbstractExecutorErgo{
-}
-
+class ExecutorErgo extends AbstractExecutorErgo{}
 
 describe('extractorErgo', () => {
     describe('processTransactions', () => {
@@ -72,5 +70,3 @@ describe('extractorErgo', () => {
         })
     })
 })
-
-
