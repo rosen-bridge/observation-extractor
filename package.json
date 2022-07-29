@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint --fix .",
-    "test": "rimraf sqlite; tsc --noEmit; npm run lint; jest; rimraf sqlite",
+    "test": "rimraf sqlite; tsc --noEmit; npm run lint; jest --detectOpenHandles ; rimraf sqlite",
     "coverage": "c8 npm run test",
     "build": "rimraf dist && tsc"
   },
