@@ -15,7 +15,7 @@ describe("extractorCardano", () => {
          * Expected: function returns true
          */
         it('checks valid rosen data', async () => {
-            const dataSource = await loadDataBase("isRosenData");
+            const dataSource = await loadDataBase("isRosenData-cardano");
             const extractor = new ExecutorCardano("1", dataSource);
             expect(extractor.isRosenData([{
                     key: "0",
@@ -38,8 +38,8 @@ describe("extractorCardano", () => {
          * Scenario: invalid Rosen metadata pass to the function metadata index is wrong
          * Expected: function returns false
          */
-        it('checks unvalid rosen data', async () => {
-            const dataSource = await loadDataBase("isRosenData");
+        it('checks invalid rosen data', async () => {
+            const dataSource = await loadDataBase("isRosenData-cardano");
             const extractor = new ExecutorCardano("1", dataSource);
             expect(extractor.isRosenData([{
                     key: "1",
@@ -65,7 +65,7 @@ describe("extractorCardano", () => {
      */
     describe('processTransactionsCardano', () => {
         it('should returns true valid rosen transaction', async () => {
-            const dataSource = await loadDataBase("processTransactionCardano-valid");
+            const dataSource = await loadDataBase("processTransactionCardano-valid-cardano");
             const extractor = new ExecutorCardano("1", dataSource);
             const Tx: KoiosTransaction = cardanoTxValid;
             const res = await extractor.processTransactions("1", [Tx]);
@@ -81,8 +81,8 @@ describe("extractorCardano", () => {
          * Scenario: zero observation should save successfully
          * Expected: processTransactions should returns true and database row count should be 0
          */
-        it('should returns false unvalid rosen metadata', async () => {
-            const dataSource = await loadDataBase("processTransactionCardano-unvalid");
+        it('should returns false invalid rosen metadata', async () => {
+            const dataSource = await loadDataBase("processTransactionCardano-invalid-cardano");
             const extractor = new ExecutorCardano("1", dataSource);
             const Tx: KoiosTransaction = {
                 ...cardanoTxValid,
