@@ -55,7 +55,7 @@ describe('extractorErgo', () => {
          * Expected: function returns undefined
          */
         it('checks transaction without token', async () => {
-            const dataSource = await loadDataBase("isRosenData");
+            const dataSource = await loadDataBase("getRosenData");
             const extractor = new ExecutorErgo("1", dataSource);
             const Tx = observationTxGenerator(false);
             expect(extractor.getRosenData(Tx.outputs().get(0))).toBe(undefined)
@@ -68,7 +68,7 @@ describe('extractorErgo', () => {
          * Expected: function returns false
          */
         it('checks transaction without valid register value', async () => {
-            const dataSource = await loadDataBase("isRosenData");
+            const dataSource = await loadDataBase("getRosenData");
             const extractor = new ExecutorErgo("1", dataSource);
             const Tx = observationTxGenerator(true, ["Cardano", "address", "10000"]);
             expect(extractor.getRosenData(Tx.outputs().get(0))).toBe(undefined)
