@@ -4,6 +4,7 @@ import { Buffer } from "buffer";
 import { blake2b } from "blakejs";
 import { extractedObservation } from "../interfaces/extractedObservation";
 import { ObservationEntityAction } from "../actions/db";
+import { rosenData } from "../interfaces/rosen";
 
 export abstract class AbstractExecutorErgo{
     id: string;
@@ -17,15 +18,22 @@ export abstract class AbstractExecutorErgo{
     }
 
     /**
-     * returns true if the box format is like rosen bridge observations
+     * returns rosenData object if the box format is like rosen bridge observations otherwise returns undefined
      * @param box
      */
-    isRosenData = (box: wasm.ErgoBox): boolean => {
+    getRosenData = (box: wasm.ErgoBox): rosenData | undefined => {
         const R4 = box.register_value(wasm.NonMandatoryRegisterId.R4)?.to_coll_coll_byte();
-        return R4 !== undefined
+        if (R4 !== undefined
             && box.tokens().len() > 0
             && R4.length >= 4
-            && this.mockedTokenMap(box.tokens().get(0).id().to_str()) != undefined
+            && this.mockedTokenMap(box.tokens().get(0).id().to_str()) != undefined) {
+            return {
+                toChain: Buffer.from(R4[0]).toString(),
+                toAddress: Buffer.from(R4[1]).toString(),
+                networkFee: Buffer.from(R4[2]).toString(),
+                bridgeFee: Buffer.from(R4[3]).toString(),
+            }
+        }
     }
 
     /**
@@ -49,23 +57,23 @@ export abstract class AbstractExecutorErgo{
                 txs.forEach(transaction => {
                     for (let index = 0; index < transaction.outputs().len(); index++) {
                         const output = transaction.outputs().get(index);
-                        const R4 = output.register_value(wasm.NonMandatoryRegisterId.R4)?.to_coll_coll_byte();
-                        if (this.isRosenData(output) && R4 !== undefined) {
+                        const data = this.getRosenData(output);
+                        if (data !== undefined) {
                             const token = output.tokens().get(0);
                             const inputAddress = "fromAddress";
                             const requestId = Buffer.from(blake2b(output.tx_id().to_str(), undefined, 32)).toString("hex");
                             observations.push({
                                 fromChain: "Ergo",
-                                toChain: Buffer.from(R4[0]).toString(),
-                                networkFee: Buffer.from(R4[2]).toString(),
-                                bridgeFee: Buffer.from(R4[3]).toString(),
+                                toChain: data.toChain,
+                                networkFee: data.networkFee,
+                                bridgeFee: data.bridgeFee,
                                 amount: token.amount().as_i64().to_str(),
                                 sourceChainTokenId: token.id().to_str(),
                                 targetChainTokenId: this.mockedTokenMap(token.id().to_str()),
                                 sourceTxId: output.tx_id().to_str(),
                                 sourceBlockId: block,
                                 requestId: requestId,
-                                toAddress: Buffer.from(R4[1]).toString(),
+                                toAddress: data.toAddress,
                                 fromAddress: inputAddress,
                             })
                         }

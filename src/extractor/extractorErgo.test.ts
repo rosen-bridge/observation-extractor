@@ -28,32 +28,37 @@ describe('extractorErgo', () => {
 
     })
 
-    describe('isRosenData', () => {
+    describe('getRosenData', () => {
 
         /**
          * Test that valid Rosen output box find successfully
          * Dependency: Nothing
          * Scenario: valid Rosen Output box pass to the function
-         * Expected: function returns true
+         * Expected: function returns rosenData object
          */
         it('valid rosen transaction', async () => {
-            const dataSource = await loadDataBase("isRosenData");
+            const dataSource = await loadDataBase("getRosenData-ergo");
             const extractor = new ExecutorErgo("1", dataSource);
             const Tx = observationTxGenerator();
-            expect(extractor.isRosenData(Tx.outputs().get(0))).toBe(true)
+            expect(extractor.getRosenData(Tx.outputs().get(0))).toStrictEqual({
+                toChain: 'Cardano',
+                toAddress: 'address',
+                bridgeFee: '1000',
+                networkFee: '10000',
+            })
         })
 
         /**
          * Test that invalid Rosen output box find successfully
          * Dependency: Nothing
          * Scenario: invalid Rosen Output box pass to the function there is no token in the box
-         * Expected: function returns false
+         * Expected: function returns undefined
          */
         it('checks transaction without token', async () => {
             const dataSource = await loadDataBase("isRosenData");
             const extractor = new ExecutorErgo("1", dataSource);
             const Tx = observationTxGenerator(false);
-            expect(extractor.isRosenData(Tx.outputs().get(0))).toBe(false)
+            expect(extractor.getRosenData(Tx.outputs().get(0))).toBe(undefined)
         })
 
         /**
@@ -66,7 +71,7 @@ describe('extractorErgo', () => {
             const dataSource = await loadDataBase("isRosenData");
             const extractor = new ExecutorErgo("1", dataSource);
             const Tx = observationTxGenerator(true, ["Cardano", "address", "10000"]);
-            expect(extractor.isRosenData(Tx.outputs().get(0))).toBe(false)
+            expect(extractor.getRosenData(Tx.outputs().get(0))).toBe(undefined)
         })
     })
 })

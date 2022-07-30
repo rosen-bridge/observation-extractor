@@ -6,18 +6,18 @@ import { ObservationEntity } from "../entities/observationEntity";
 class ExecutorCardano extends AbstractExecutorCardano{}
 
 describe("extractorCardano", () => {
-    describe('isRosenData', () => {
+    describe('getRosenData', () => {
 
         /**
          * Test that valid Rosen metadata find successfully
          * Dependency: Nothing
          * Scenario: valid Rosen metadata pass to the function
-         * Expected: function returns true
+         * Expected: function returns rosenData object
          */
-        it('checks valid rosen data', async () => {
-            const dataSource = await loadDataBase("isRosenData-cardano");
+        it('checks valid rosenData', async () => {
+            const dataSource = await loadDataBase("getRosenData-cardano");
             const extractor = new ExecutorCardano("1", dataSource);
-            expect(extractor.isRosenData([{
+            expect(extractor.getRosenData([{
                     key: "0",
                     json: JSON.parse(
                         '{' +
@@ -29,23 +29,27 @@ describe("extractorCardano", () => {
                         '}')
                 }
                 ])
-            ).toBe(true)
+            ).toStrictEqual({
+                toChain: "ERGO",
+                bridgeFee: "10000",
+                networkFee: "1000",
+                toAddress: "ergoAddress",
+            })
         })
 
         /**
          * Test that invalid Rosen metadata find successfully
          * Dependency: Nothing
          * Scenario: invalid Rosen metadata pass to the function metadata index is wrong
-         * Expected: function returns false
+         * Expected: function returns undefined
          */
         it('checks invalid rosen data', async () => {
-            const dataSource = await loadDataBase("isRosenData-cardano");
+            const dataSource = await loadDataBase("getRosenData-cardano");
             const extractor = new ExecutorCardano("1", dataSource);
-            expect(extractor.isRosenData([{
-                    key: "1",
+            expect(extractor.getRosenData([{
+                    key: "0",
                     json: JSON.parse(
                         '{' +
-                        '"to": "ERGO",' +
                         '"bridgeFee": "10000",' +
                         '"networkFee": "1000",' +
                         '"toAddress": "ergoAddress",' +
@@ -53,7 +57,7 @@ describe("extractorCardano", () => {
                         '}')
                 }
                 ])
-            ).toBe(false)
+            ).toBe(undefined)
         })
     })
 
