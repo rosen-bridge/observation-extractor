@@ -1,9 +1,9 @@
 {
-  "name": "rosen-commitment-extractor",
+  "name": "@rosen-bridge/commitment-extractor",
   "version": "0.1.0",
   "description": "",
-  "main": "dist/lib/index.js",
-  "types": "dist/lib/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "lint": "eslint --fix .",
     "test": "rimraf sqlite; tsc --noEmit; npm run lint; jest --detectOpenHandles ; rimraf sqlite",
