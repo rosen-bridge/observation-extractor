@@ -1,4 +1,4 @@
-export interface rosenData{
+export interface RosenData {
     toChain: string,
     toAddress: string,
     bridgeFee: string,

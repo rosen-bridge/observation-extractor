@@ -2,7 +2,8 @@
   "name": "rosen-commitment-extractor",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/lib/index.js",
+  "types": "dist/lib/index.d.ts",
   "scripts": {
     "lint": "eslint --fix .",
     "test": "rimraf sqlite; tsc --noEmit; npm run lint; jest --detectOpenHandles ; rimraf sqlite",

@@ -4,7 +4,7 @@ import { blake2b } from "blakejs";
 import { extractedObservation } from "../interfaces/extractedObservation";
 import { ObservationEntityAction } from "../actions/db";
 import { KoiosTransaction, MetaData } from "../interfaces/koiosTransaction";
-import { rosenData } from "../interfaces/rosen";
+import { RosenData } from "../interfaces/rosen";
 
 export class CardanoObservationExtractor{
     id: string;
@@ -19,23 +19,18 @@ export class CardanoObservationExtractor{
 
     /**
      * returns rosenData object if the box format is like rosen bridge observations otherwise returns undefined
-     * @param metadata
+     * @param metaDataArray
      */
-    getRosenData = (metadata: Array<MetaData>): rosenData | undefined => {
-        if (metadata.length > 0 && metadata[0].key === "0") {
-            const metaData = metadata[0].json;
+    getRosenData = (metaDataArray: Array<MetaData>): RosenData | undefined => {
+        if (metaDataArray.length > 0 && metaDataArray[0].key === "0") {
+            const metaData = metaDataArray[0].json;
             if ('to' in metaData
                 && 'bridgeFee' in metaData
                 && 'networkFee' in metaData
                 && 'toAddress' in metaData) {
-                const rosenData = metaData as unknown as {
-                    to: string,
-                    bridgeFee: string,
-                    networkFee: string,
-                    toAddress: string
-                }
+                const rosenData = metaData as unknown as RosenData
                 return {
-                    toChain: rosenData.to,
+                    toChain: rosenData.toChain,
                     bridgeFee: rosenData.bridgeFee,
                     networkFee: rosenData.networkFee,
                     toAddress: rosenData.toAddress
@@ -52,6 +47,7 @@ export class CardanoObservationExtractor{
      * @param assetName
      */
     mockedAssetIds = (policyId: string, assetName: string): { fingerprint: string, tokenId: string } | undefined => {
+        // TODO must use tokens package
         return {fingerprint: "f6a69529b12a7e2326acffee8383e0c44408f87a872886fadf410fe8498006d3", tokenId: "ergo"}
     }
 
@@ -96,7 +92,10 @@ export class CardanoObservationExtractor{
                     })
                     this.actions.storeObservations(observations, block).then(() => {
                         resolve(true)
-                    }).catch((e) => reject(e))
+                    }).catch((e) => {
+                        console.log(`An error occured during store observations: ${e}`)
+                        reject(e)
+                    })
                 } catch
                     (e) {
                     reject(e);

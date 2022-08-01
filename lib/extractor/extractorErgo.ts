@@ -4,9 +4,9 @@ import { Buffer } from "buffer";
 import { blake2b } from "blakejs";
 import { extractedObservation } from "../interfaces/extractedObservation";
 import { ObservationEntityAction } from "../actions/db";
-import { rosenData } from "../interfaces/rosen";
+import { RosenData } from "../interfaces/rosen";
 
-export class ErgoObservationExtractor{
+export class ErgoObservationExtractor {
     id: string;
     private readonly dataSource: DataSource;
     private readonly actions: ObservationEntityAction;
@@ -21,7 +21,7 @@ export class ErgoObservationExtractor{
      * returns rosenData object if the box format is like rosen bridge observations otherwise returns undefined
      * @param box
      */
-    getRosenData = (box: wasm.ErgoBox): rosenData | undefined => {
+    getRosenData = (box: wasm.ErgoBox): RosenData | undefined => {
         const R4 = box.register_value(wasm.NonMandatoryRegisterId.R4)?.to_coll_coll_byte();
         if (R4 !== undefined
             && box.tokens().len() > 0
@@ -41,6 +41,7 @@ export class ErgoObservationExtractor{
      * @param tokenId
      */
     mockedTokenMap = (tokenId: string): string => {
+        // TODO must connect to tokens map package
         return "f6a69529b12a7e2326acffee8383e0c44408f87a872886fadf410fe8498006d3"
     }
 
@@ -79,10 +80,10 @@ export class ErgoObservationExtractor{
                         }
                     }
                 })
-                this.actions.storeObservations(observations, block).then(() => {
-                    resolve(true)
+                this.actions.storeObservations(observations, block).then((status) => {
+                    resolve(status)
                 }).catch((e) => {
-                    console.log(e);
+                    console.log(`An error uncached exception occurred during store ergo observation: ${e}`);
                     reject(e)
                 })
             } catch (e) {

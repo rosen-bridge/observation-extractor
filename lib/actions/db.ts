@@ -40,6 +40,7 @@ export class ObservationEntityAction{
             await queryRunner.manager.save(observationEntity);
             await queryRunner.commitTransaction();
         } catch (e) {
+            console.log(`An error occurred during store observation action: ${e}`)
             await queryRunner.rollbackTransaction();
             error = false;
         } finally {
