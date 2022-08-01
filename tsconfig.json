@@ -10,7 +10,7 @@
     "declaration": true,
     "moduleResolution": "Node",
     "module": "esnext",
-    "rootDir": "./src",
+    "rootDir": "./lib",
     "resolveJsonModule": true,
     "allowJs": false,
     "outDir": "./dist",
@@ -22,11 +22,11 @@
     "skipLibCheck": true
   },
   "include": [
-    "src/**/*"
+    "lib/**/*"
   ],
   "exclude": [
-    "src/**/*.spec.ts",
-    "src/**/*.test.ts",
-    "src/**/*.mock.ts"
+    "lib/**/*.spec.ts",
+    "lib/**/*.test.ts",
+    "lib/**/*.mock.ts"
   ]
 }

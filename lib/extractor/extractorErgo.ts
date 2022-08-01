@@ -6,7 +6,7 @@ import { extractedObservation } from "../interfaces/extractedObservation";
 import { ObservationEntityAction } from "../actions/db";
 import { rosenData } from "../interfaces/rosen";
 
-export abstract class AbstractExecutorErgo{
+export class ErgoObservationExtractor{
     id: string;
     private readonly dataSource: DataSource;
     private readonly actions: ObservationEntityAction;

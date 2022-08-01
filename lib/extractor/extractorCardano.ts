@@ -6,7 +6,7 @@ import { ObservationEntityAction } from "../actions/db";
 import { KoiosTransaction, MetaData } from "../interfaces/koiosTransaction";
 import { rosenData } from "../interfaces/rosen";
 
-export abstract class AbstractExecutorCardano{
+export class CardanoObservationExtractor{
     id: string;
     private readonly dataSource: DataSource;
     private readonly actions: ObservationEntityAction;
