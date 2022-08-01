@@ -2,7 +2,7 @@ import { ObservationEntity } from "../entities/observationEntity";
 import { DataSource } from "typeorm";
 import { extractedObservation } from "../interfaces/extractedObservation";
 
-export class ObservationEntityAction{
+export class ObservationEntityAction {
     private readonly datasource: DataSource;
 
     constructor(dataSource: DataSource) {
@@ -14,7 +14,7 @@ export class ObservationEntityAction{
      * @param observations
      * @param block
      */
-    storeObservations = async (observations: Array<extractedObservation>, block: string) => {
+    storeObservations = async (observations: Array<extractedObservation>, block: string, extractor: string) => {
         const observationEntity = observations.map((observation) => {
             const row = new ObservationEntity();
             row.block = block;
@@ -30,6 +30,7 @@ export class ObservationEntityAction{
             row.sourceChainTokenId = observation.sourceChainTokenId;
             row.targetChainTokenId = observation.targetChainTokenId;
             row.toAddress = observation.toAddress;
+            row.extractor = extractor
             return row;
         });
         let error = true;
@@ -47,6 +48,16 @@ export class ObservationEntityAction{
             await queryRunner.release();
         }
         return error;
+    }
+
+    deleteBlockObservation = async (block: string, extractor: string) => {
+        await this.datasource.createQueryBuilder()
+            .delete()
+            .from(ObservationEntity)
+            .where("extractor = :extractor AND block = :block", {
+                "block": block,
+                "extractor": extractor
+            }).execute()
     }
 
 }

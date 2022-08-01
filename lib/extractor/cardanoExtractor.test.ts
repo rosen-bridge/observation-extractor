@@ -1,11 +1,12 @@
-import { AbstractExecutorCardano } from "./extractorCardano";
+import { CardanoObservationExtractor } from "./cardanoExtractor";
 import { KoiosTransaction } from "../interfaces/koiosTransaction";
 import { cardanoTxValid, loadDataBase } from "./utils.mock";
 import { ObservationEntity } from "../entities/observationEntity";
 
-class ExecutorCardano extends AbstractExecutorCardano{}
+class ExecutorCardano extends CardanoObservationExtractor {
+}
 
-describe("extractorCardano", () => {
+describe("cardanoKoiosObservationExtractor", () => {
     describe('getRosenData', () => {
 
         /**
@@ -16,7 +17,7 @@ describe("extractorCardano", () => {
          */
         it('checks valid rosenData', async () => {
             const dataSource = await loadDataBase("getRosenData-cardano");
-            const extractor = new ExecutorCardano("1", dataSource);
+            const extractor = new ExecutorCardano(dataSource);
             expect(extractor.getRosenData([{
                     key: "0",
                     json: JSON.parse(
@@ -45,7 +46,7 @@ describe("extractorCardano", () => {
          */
         it('checks invalid rosen data', async () => {
             const dataSource = await loadDataBase("getRosenData-cardano");
-            const extractor = new ExecutorCardano("1", dataSource);
+            const extractor = new ExecutorCardano(dataSource);
             expect(extractor.getRosenData([{
                     key: "0",
                     json: JSON.parse(
@@ -70,7 +71,7 @@ describe("extractorCardano", () => {
     describe('processTransactionsCardano', () => {
         it('should returns true valid rosen transaction', async () => {
             const dataSource = await loadDataBase("processTransactionCardano-valid-cardano");
-            const extractor = new ExecutorCardano("1", dataSource);
+            const extractor = new ExecutorCardano(dataSource);
             const Tx: KoiosTransaction = cardanoTxValid;
             const res = await extractor.processTransactions("1", [Tx]);
             expect(res).toBe(true);
@@ -87,7 +88,7 @@ describe("extractorCardano", () => {
          */
         it('should returns false invalid rosen metadata', async () => {
             const dataSource = await loadDataBase("processTransactionCardano-invalid-cardano");
-            const extractor = new ExecutorCardano("1", dataSource);
+            const extractor = new ExecutorCardano(dataSource);
             const Tx: KoiosTransaction = {
                 ...cardanoTxValid,
                 metadata: [{

@@ -6,16 +6,19 @@ import { ObservationEntityAction } from "../actions/db";
 import { KoiosTransaction, MetaData } from "../interfaces/koiosTransaction";
 import { RosenData } from "../interfaces/rosen";
 
-export class CardanoObservationExtractor{
-    id: string;
+export class CardanoObservationExtractor {
     private readonly dataSource: DataSource;
     private readonly actions: ObservationEntityAction;
 
-    constructor(id: string, dataSource: DataSource) {
-        this.id = id;
+    constructor(dataSource: DataSource) {
         this.dataSource = dataSource;
         this.actions = new ObservationEntityAction(dataSource);
     }
+
+    /**
+     * get Id for current extractor
+     */
+    getId = () => "ergo-cardano-koios-extractor"
 
     /**
      * returns rosenData object if the box format is like rosen bridge observations otherwise returns undefined
@@ -28,9 +31,14 @@ export class CardanoObservationExtractor{
                 && 'bridgeFee' in metaData
                 && 'networkFee' in metaData
                 && 'toAddress' in metaData) {
-                const rosenData = metaData as unknown as RosenData
+                const rosenData = metaData as unknown as {
+                    to: string;
+                    bridgeFee: string;
+                    networkFee: string;
+                    toAddress: string;
+                }
                 return {
-                    toChain: rosenData.toChain,
+                    toChain: rosenData.to,
                     bridgeFee: rosenData.bridgeFee,
                     networkFee: rosenData.networkFee,
                     toAddress: rosenData.toAddress
@@ -90,7 +98,7 @@ export class CardanoObservationExtractor{
                             }
                         }
                     })
-                    this.actions.storeObservations(observations, block).then(() => {
+                    this.actions.storeObservations(observations, block, this.getId()).then(() => {
                         resolve(true)
                     }).catch((e) => {
                         console.log(`An error occured during store observations: ${e}`)
@@ -103,4 +111,13 @@ export class CardanoObservationExtractor{
             }
         );
     }
+
+    /**
+     * fork one block and remove all stored information for this block
+     * @param hash: block hash
+     */
+    forkBlock = async (hash: string): Promise<void> => {
+        await this.actions.deleteBlockObservation(hash, this.getId())
+    };
+
 }

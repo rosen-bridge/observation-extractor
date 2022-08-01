@@ -7,15 +7,18 @@ import { ObservationEntityAction } from "../actions/db";
 import { RosenData } from "../interfaces/rosen";
 
 export class ErgoObservationExtractor {
-    id: string;
     private readonly dataSource: DataSource;
     private readonly actions: ObservationEntityAction;
 
-    constructor(id: string, dataSource: DataSource) {
-        this.id = id;
+    constructor(dataSource: DataSource) {
         this.dataSource = dataSource;
         this.actions = new ObservationEntityAction(dataSource);
     }
+
+    /**
+     * get Id for current extractor
+     */
+    getId = () => "ergo-observation-extractor"
 
     /**
      * returns rosenData object if the box format is like rosen bridge observations otherwise returns undefined
@@ -48,10 +51,10 @@ export class ErgoObservationExtractor {
     /**
      * gets block id and transactions corresponding to the block and saves if they are valid rosen
      *  transactions and in case of success return true and in case of failure returns false
-     * @param block
+     * @param blockId
      * @param txs
      */
-    processTransactions = (block: string, txs: Array<wasm.Transaction>): Promise<boolean> => {
+    processTransactions = (txs: Array<wasm.Transaction>, blockId: string): Promise<boolean> => {
         return new Promise((resolve, reject) => {
             try {
                 const observations: Array<extractedObservation> = [];
@@ -72,7 +75,7 @@ export class ErgoObservationExtractor {
                                 sourceChainTokenId: token.id().to_str(),
                                 targetChainTokenId: this.mockedTokenMap(token.id().to_str()),
                                 sourceTxId: output.tx_id().to_str(),
-                                sourceBlockId: block,
+                                sourceBlockId: blockId,
                                 requestId: requestId,
                                 toAddress: data.toAddress,
                                 fromAddress: inputAddress,
@@ -80,7 +83,7 @@ export class ErgoObservationExtractor {
                         }
                     }
                 })
-                this.actions.storeObservations(observations, block).then((status) => {
+                this.actions.storeObservations(observations, blockId, this.getId()).then((status) => {
                     resolve(status)
                 }).catch((e) => {
                     console.log(`An error uncached exception occurred during store ergo observation: ${e}`);
@@ -92,4 +95,12 @@ export class ErgoObservationExtractor {
             }
         });
     }
+
+    /**
+     * fork one block and remove all stored information for this block
+     * @param hash: block hash
+     */
+    forkBlock = async (hash: string): Promise<void> => {
+        await this.actions.deleteBlockObservation(hash, this.getId())
+    };
 }

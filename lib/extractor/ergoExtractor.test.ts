@@ -1,8 +1,9 @@
-import { AbstractExecutorErgo } from "./extractorErgo";
+import { ErgoObservationExtractor } from "./ergoExtractor";
 import { loadDataBase, observationTxGenerator } from "./utils.mock";
 import { ObservationEntity } from "../entities/observationEntity";
 
-class ExecutorErgo extends AbstractExecutorErgo{}
+class ExecutorErgo extends ErgoObservationExtractor {
+}
 
 describe('extractorErgo', () => {
     describe('processTransactions', () => {
@@ -15,11 +16,11 @@ describe('extractorErgo', () => {
          */
         it('checks valid transaction', async () => {
             const dataSource = await loadDataBase("processTransactionErgo");
-            const extractor = new ExecutorErgo("1", dataSource);
+            const extractor = new ExecutorErgo(dataSource);
             const Tx1 = observationTxGenerator();
             const Tx2 = observationTxGenerator();
             const Tx3 = observationTxGenerator(false);
-            const res = await extractor.processTransactions("1", [Tx1, Tx2, Tx3]);
+            const res = await extractor.processTransactions([Tx1, Tx2, Tx3], "1");
             expect(res).toBe(true);
             const repository = dataSource.getRepository(ObservationEntity);
             const [, rowsCount] = await repository.findAndCount();
@@ -38,7 +39,7 @@ describe('extractorErgo', () => {
          */
         it('valid rosen transaction', async () => {
             const dataSource = await loadDataBase("getRosenData-ergo");
-            const extractor = new ExecutorErgo("1", dataSource);
+            const extractor = new ExecutorErgo(dataSource);
             const Tx = observationTxGenerator();
             expect(extractor.getRosenData(Tx.outputs().get(0))).toStrictEqual({
                 toChain: 'Cardano',
@@ -56,7 +57,7 @@ describe('extractorErgo', () => {
          */
         it('checks transaction without token', async () => {
             const dataSource = await loadDataBase("getRosenData");
-            const extractor = new ExecutorErgo("1", dataSource);
+            const extractor = new ExecutorErgo(dataSource);
             const Tx = observationTxGenerator(false);
             expect(extractor.getRosenData(Tx.outputs().get(0))).toBe(undefined)
         })
@@ -69,7 +70,7 @@ describe('extractorErgo', () => {
          */
         it('checks transaction without valid register value', async () => {
             const dataSource = await loadDataBase("getRosenData");
-            const extractor = new ExecutorErgo("1", dataSource);
+            const extractor = new ExecutorErgo(dataSource);
             const Tx = observationTxGenerator(true, ["Cardano", "address", "10000"]);
             expect(extractor.getRosenData(Tx.outputs().get(0))).toBe(undefined)
         })

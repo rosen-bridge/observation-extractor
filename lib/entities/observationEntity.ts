@@ -48,4 +48,6 @@ export class ObservationEntity{
     @Column()
     block: string;
 
+    @Column()
+    extractor: string;
 }
