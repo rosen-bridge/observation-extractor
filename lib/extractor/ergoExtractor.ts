@@ -2,7 +2,7 @@ import { DataSource } from "typeorm";
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { Buffer } from "buffer";
 import { blake2b } from "blakejs";
-import { extractedObservation } from "../interfaces/extractedObservation";
+import { ExtractedObservation } from "../interfaces/extractedObservation";
 import { ObservationEntityAction } from "../actions/db";
 import { RosenData } from "../interfaces/rosen";
 
@@ -57,7 +57,7 @@ export class ErgoObservationExtractor {
     processTransactions = (txs: Array<wasm.Transaction>, blockId: string): Promise<boolean> => {
         return new Promise((resolve, reject) => {
             try {
-                const observations: Array<extractedObservation> = [];
+                const observations: Array<ExtractedObservation> = [];
                 txs.forEach(transaction => {
                     for (let index = 0; index < transaction.outputs().len(); index++) {
                         const output = transaction.outputs().get(index);

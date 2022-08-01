@@ -1,4 +1,4 @@
-export interface extractedObservation{
+export interface ExtractedObservation {
     fromChain: string,
     toChain: string,
     networkFee: string,

@@ -1,6 +1,6 @@
 import { ObservationEntity } from "../entities/observationEntity";
 import { DataSource } from "typeorm";
-import { extractedObservation } from "../interfaces/extractedObservation";
+import { ExtractedObservation } from "../interfaces/extractedObservation";
 
 export class ObservationEntityAction {
     private readonly datasource: DataSource;
@@ -14,7 +14,7 @@ export class ObservationEntityAction {
      * @param observations
      * @param block
      */
-    storeObservations = async (observations: Array<extractedObservation>, block: string, extractor: string) => {
+    storeObservations = async (observations: Array<ExtractedObservation>, block: string, extractor: string) => {
         const observationEntity = observations.map((observation) => {
             const row = new ObservationEntity();
             row.block = block;

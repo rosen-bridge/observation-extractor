@@ -1,10 +1,10 @@
 import { ObservationEntityAction } from "./db";
 import { ObservationEntity } from "../entities/observationEntity";
-import { extractedObservation } from "../interfaces/extractedObservation";
+import { ExtractedObservation } from "../interfaces/extractedObservation";
 import { loadDataBase } from "../extractor/utils.mock";
 
 
-const observations: Array<extractedObservation> = [{
+const observations: Array<ExtractedObservation> = [{
     fromChain: "erg",
     toChain: "cardano",
     fromAddress: "ErgoAddress",

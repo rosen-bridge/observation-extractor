@@ -1,7 +1,7 @@
 import { DataSource } from "typeorm";
 import { Buffer } from "buffer";
 import { blake2b } from "blakejs";
-import { extractedObservation } from "../interfaces/extractedObservation";
+import { ExtractedObservation } from "../interfaces/extractedObservation";
 import { ObservationEntityAction } from "../actions/db";
 import { KoiosTransaction, MetaData } from "../interfaces/koiosTransaction";
 import { RosenData } from "../interfaces/rosen";
@@ -68,7 +68,7 @@ export class CardanoObservationExtractor {
     processTransactions = (block: string, txs: Array<KoiosTransaction>): Promise<boolean> => {
         return new Promise((resolve, reject) => {
                 try {
-                    const observations: Array<extractedObservation> = [];
+                    const observations: Array<ExtractedObservation> = [];
                     txs.forEach(transaction => {
                         if (transaction.metadata !== undefined) {
                             const data = this.getRosenData(transaction.metadata);
