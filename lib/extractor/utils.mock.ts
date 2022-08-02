@@ -2,6 +2,7 @@ import { DataSource } from "typeorm";
 import { ObservationEntity } from "../entities/observationEntity";
 import { migrations } from "../migrations";
 import * as wasm from "ergo-lib-wasm-nodejs";
+import { BlockEntity } from "@rosen-bridge/scanner";
 
 export const last10BlockHeader = [{
     "extensionId": "27143b3ad6607ca59fc6b882a96d999c1147dbedb4caa3c945208318feb6ef76",
@@ -397,3 +398,10 @@ export const observationTxGenerator = (
     return wallet.sign_transaction(ctx, tx, unspentBoxes, wasm.ErgoBoxes.from_boxes_json([]))
 }
 
+export const generateBlockEntity = (hash: string, parent?: string, height?: number) => {
+    const res = new BlockEntity()
+    res.height = height ? height : 1
+    res.parentHash = parent ? parent : "1"
+    res.hash = hash
+    return res
+}

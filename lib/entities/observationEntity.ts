@@ -22,6 +22,9 @@ export class ObservationEntity{
     toAddress: string
 
     @Column()
+    height: number
+
+    @Column()
     amount: string
 
     @Column()

@@ -5,12 +5,14 @@ import { ExtractedObservation } from "../interfaces/extractedObservation";
 import { ObservationEntityAction } from "../actions/db";
 import { KoiosTransaction, MetaData } from "../interfaces/koiosTransaction";
 import { RosenData } from "../interfaces/rosen";
+import { AbstractExtractor, BlockEntity } from "@rosen-bridge/scanner";
 
-export class CardanoObservationExtractor {
+export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransaction>{
     private readonly dataSource: DataSource;
     private readonly actions: ObservationEntityAction;
 
     constructor(dataSource: DataSource) {
+        super();
         this.dataSource = dataSource;
         this.actions = new ObservationEntityAction(dataSource);
     }
@@ -65,7 +67,7 @@ export class CardanoObservationExtractor {
      * @param block
      * @param txs
      */
-    processTransactions = (block: string, txs: Array<KoiosTransaction>): Promise<boolean> => {
+    processTransactions = (txs: Array<KoiosTransaction>, block: BlockEntity): Promise<boolean> => {
         return new Promise((resolve, reject) => {
                 try {
                     const observations: Array<ExtractedObservation> = [];
@@ -89,7 +91,7 @@ export class CardanoObservationExtractor {
                                         sourceTxId: transaction.tx_hash,
                                         bridgeFee: data.bridgeFee,
                                         networkFee: data.networkFee,
-                                        sourceBlockId: block,
+                                        sourceBlockId: block.hash,
                                         requestId: requestId,
                                         toAddress: data.toAddress,
                                         fromAddress: transaction.inputs[0].payment_addr.bech32

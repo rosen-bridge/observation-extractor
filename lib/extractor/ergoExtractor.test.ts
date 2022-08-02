@@ -1,5 +1,5 @@
 import { ErgoObservationExtractor } from "./ergoExtractor";
-import { loadDataBase, observationTxGenerator } from "./utils.mock";
+import { generateBlockEntity, loadDataBase, observationTxGenerator } from "./utils.mock";
 import { ObservationEntity } from "../entities/observationEntity";
 
 class ExecutorErgo extends ErgoObservationExtractor {
@@ -20,7 +20,7 @@ describe('extractorErgo', () => {
             const Tx1 = observationTxGenerator();
             const Tx2 = observationTxGenerator();
             const Tx3 = observationTxGenerator(false);
-            const res = await extractor.processTransactions([Tx1, Tx2, Tx3], "1");
+            const res = await extractor.processTransactions([Tx1, Tx2, Tx3], generateBlockEntity("1"));
             expect(res).toBe(true);
             const repository = dataSource.getRepository(ObservationEntity);
             const [, rowsCount] = await repository.findAndCount();

@@ -5,8 +5,9 @@ import { blake2b } from "blakejs";
 import { ExtractedObservation } from "../interfaces/extractedObservation";
 import { ObservationEntityAction } from "../actions/db";
 import { RosenData } from "../interfaces/rosen";
+import { AbstractExtractor, BlockEntity } from "@rosen-bridge/scanner";
 
-export class ErgoObservationExtractor {
+export class ErgoObservationExtractor implements AbstractExtractor<wasm.Transaction>{
     private readonly dataSource: DataSource;
     private readonly actions: ObservationEntityAction;
 
@@ -54,7 +55,7 @@ export class ErgoObservationExtractor {
      * @param blockId
      * @param txs
      */
-    processTransactions = (txs: Array<wasm.Transaction>, blockId: string): Promise<boolean> => {
+    processTransactions = (txs: Array<wasm.Transaction>, block: BlockEntity): Promise<boolean> => {
         return new Promise((resolve, reject) => {
             try {
                 const observations: Array<ExtractedObservation> = [];
@@ -75,7 +76,7 @@ export class ErgoObservationExtractor {
                                 sourceChainTokenId: token.id().to_str(),
                                 targetChainTokenId: this.mockedTokenMap(token.id().to_str()),
                                 sourceTxId: output.tx_id().to_str(),
-                                sourceBlockId: blockId,
+                                sourceBlockId: block.hash,
                                 requestId: requestId,
                                 toAddress: data.toAddress,
                                 fromAddress: inputAddress,
@@ -83,7 +84,7 @@ export class ErgoObservationExtractor {
                         }
                     }
                 })
-                this.actions.storeObservations(observations, blockId, this.getId()).then((status) => {
+                this.actions.storeObservations(observations, block, this.getId()).then((status) => {
                     resolve(status)
                 }).catch((e) => {
                     console.log(`An error uncached exception occurred during store ergo observation: ${e}`);
