@@ -11,6 +11,7 @@ export class networkModelMigration1658414485911 implements MigrationInterface{
                     "toChain" varchar(30) NOT NULL, 
                     "fromAddress" varchar NOT NULL, 
                     "toAddress" varchar NOT NULL, 
+                    "height" INTEGER NOT NULL, 
                     "amount" varchar NOT NULL, 
                     "networkFee" varchar NOT NULL, 
                     "bridgeFee" varchar NOT NULL, 

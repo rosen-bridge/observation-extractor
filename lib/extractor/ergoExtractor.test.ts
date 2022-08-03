@@ -20,12 +20,12 @@ describe('extractorErgo', () => {
             const Tx1 = observationTxGenerator();
             const Tx2 = observationTxGenerator();
             const Tx3 = observationTxGenerator(false);
-            const res = await extractor.processTransactions([Tx1, Tx2, Tx3], generateBlockEntity("1"));
-            expect(res).toBe(true);
+            const res = await extractor.processTransactions([Tx1, Tx2, Tx3], generateBlockEntity(dataSource, "1"));
+            expect(res).toBeFalsy();
             const repository = dataSource.getRepository(ObservationEntity);
             const [, rowsCount] = await repository.findAndCount();
             expect(rowsCount).toBe(2);
-        })
+        }, 1000000)
 
     })
 

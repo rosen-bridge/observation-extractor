@@ -58,6 +58,7 @@ export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransact
      */
     mockedAssetIds = (policyId: string, assetName: string): { fingerprint: string, tokenId: string } | undefined => {
         // TODO must use tokens package
+        console.log(policyId, assetName)
         return {fingerprint: "f6a69529b12a7e2326acffee8383e0c44408f87a872886fadf410fe8498006d3", tokenId: "ergo"}
     }
 

@@ -36,7 +36,7 @@ export class ObservationEntityAction {
             row.extractor = extractor
             return row;
         });
-        let error = true;
+        let error = false;
         const queryRunner = this.datasource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -46,7 +46,7 @@ export class ObservationEntityAction {
         } catch (e) {
             console.log(`An error occurred during store observation action: ${e}`)
             await queryRunner.rollbackTransaction();
-            error = false;
+            error = true;
         } finally {
             await queryRunner.release();
         }

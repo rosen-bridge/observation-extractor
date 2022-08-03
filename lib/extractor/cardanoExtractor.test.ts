@@ -2,7 +2,6 @@ import { CardanoObservationExtractor } from "./cardanoExtractor";
 import { KoiosTransaction } from "../interfaces/koiosTransaction";
 import { cardanoTxValid, generateBlockEntity, loadDataBase } from "./utils.mock";
 import { ObservationEntity } from "../entities/observationEntity";
-import { BlockEntity } from "@rosen-bridge/scanner";
 
 class ExecutorCardano extends CardanoObservationExtractor {
 }
@@ -74,7 +73,7 @@ describe("cardanoKoiosObservationExtractor", () => {
             const dataSource = await loadDataBase("processTransactionCardano-valid-cardano");
             const extractor = new ExecutorCardano(dataSource);
             const Tx: KoiosTransaction = cardanoTxValid;
-            const res = await extractor.processTransactions([Tx], generateBlockEntity("1"));
+            const res = await extractor.processTransactions([Tx], generateBlockEntity(dataSource, "1"));
             expect(res).toBe(true);
             const repository = dataSource.getRepository(ObservationEntity);
             const [, rowsCount] = await repository.findAndCount();
@@ -97,7 +96,7 @@ describe("cardanoKoiosObservationExtractor", () => {
                     json: JSON.parse('{"to": "ERGO","bridgeFee": "10000","toAddress": "ergoAddress","targetChainTokenId": "cardanoTokenId"}')
                 }]
             };
-            const res = await extractor.processTransactions([Tx], generateBlockEntity("1"));
+            const res = await extractor.processTransactions([Tx], generateBlockEntity(dataSource, "1"));
             expect(res).toBe(true);
             const repository = dataSource.getRepository(ObservationEntity);
             const [, rowsCount] = await repository.findAndCount();

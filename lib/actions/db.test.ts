@@ -45,8 +45,8 @@ describe("ObservationEntityAction", () => {
         it("checks observations saved successfully", async () => {
             const dataSource = await loadDataBase("db");
             const action = new ObservationEntityAction(dataSource);
-            const res = await action.storeObservations(observations, generateBlockEntity("1"), "extractor-test");
-            expect(res).toBe(true);
+            const res = await action.storeObservations(observations, generateBlockEntity(dataSource, "1"), "extractor-test");
+            expect(res).toBe(false);
             const repository = dataSource.getRepository(ObservationEntity);
             const [, rowsCount] = await repository.findAndCount();
             expect(rowsCount).toBe(2);
@@ -58,7 +58,7 @@ describe("ObservationEntityAction", () => {
     /**
      * Test when fork a block must deleted from database
      */
-    describe("deleteBlockObservation",  () => {
+    describe("deleteBlockObservation", () => {
         it("should remove only block with specific block id and extractor id", async () => {
             const genHexString = (len = 64) => {
                 const hex = '0123456789ABCDEF';
@@ -71,7 +71,7 @@ describe("ObservationEntityAction", () => {
             const dataSource = await loadDataBase("fork");
             const action = new ObservationEntityAction(dataSource);
             const insertObservation = async (extractor: string, block: BlockEntity) => {
-                 await action.storeObservations([{
+                await action.storeObservations([{
                     sourceBlockId: block.hash,
                     bridgeFee: "100",
                     networkFee: "1000",
@@ -86,8 +86,8 @@ describe("ObservationEntityAction", () => {
                     fromChain: genHexString()
                 }], block, extractor)
             }
-            const block1 = generateBlockEntity("block1")
-            const block2 = generateBlockEntity("block2", "block1", 2)
+            const block1 = generateBlockEntity(dataSource, "block1")
+            const block2 = generateBlockEntity(dataSource, "block2", "block1", 2)
             await insertObservation("cardano", block1)
             await insertObservation("cardano", block2)
             await insertObservation("ergo", block1)
