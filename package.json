@@ -1,17 +1,21 @@
 {
-  "name": "@rosen-bridge/commitment-extractor",
+  "name": "@rosen-bridge/observation-extractor",
   "version": "0.1.0",
   "description": "",
+  "author": "Sahand Zoufan",
+  "license": "GPL-3.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "lint": "eslint --fix .",
     "test": "rimraf sqlite; tsc --noEmit; npm run lint; jest --detectOpenHandles ; rimraf sqlite",
     "coverage": "c8 npm run test",
-    "build": "rimraf dist && tsc"
+    "build": "rimraf dist && tsc",
+    "release": "npm run test && npm run build && npm publish --access public"
   },
-  "author": "",
-  "license": "ISC",
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@rosen-bridge/scanner": "^0.1.5",
     "@rosen-bridge/tokens": "^0.1.5",
