@@ -1,20 +1,21 @@
 import { ErgoObservationExtractor } from "./ergoExtractor";
 import { CardanoObservationExtractor } from "./cardanoExtractor";
-import { TokensMap } from "@rosen-bridge/tokens/dist/TokenMap/types";
+import { RosenTokens } from "@rosen-bridge/tokens";
 
-export const tokens: TokensMap = {
+export const tokens: RosenTokens = {
     idKeys: {
-        "ergo": "tokenId",
-        "cardano": "fingerprint",
-    }
+        ergo: "tokenId",
+        cardano: "fingerprint",
+    },
     tokens: [
         {
             [ErgoObservationExtractor.FROM_CHAIN]: {
                 tokenId: "ergo",
             },
             [CardanoObservationExtractor.FROM_CHAIN]: {
-                fingerprint: "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
-                tokenId: "7369676d61",
+                fingerprint: "fingerPrint",
+                policyId: "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
+                assetName: "7369676d61",
             }
         },
         {

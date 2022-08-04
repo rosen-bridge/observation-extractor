@@ -250,7 +250,7 @@ export const cardanoTxValid = {
     block_hash: "",
     metadata: [{
         key: "0",
-        json: JSON.parse('{"to": "ERGO","bridgeFee": "10000","networkFee": "10000","toAddress": "ergoAddress","targetChainTokenId": "cardanoTokenId"}')
+        json: JSON.parse('{"to": "ergo","bridgeFee": "10000","networkFee": "10000","toAddress": "ergoAddress","targetChainTokenId": "cardanoTokenId"}')
     }],
     tx_hash: "",
     inputs: [
@@ -335,7 +335,7 @@ export const loadDataBase = async (name: string): Promise<DataSource> => {
 
 export const observationTxGenerator = (
     hasToken = true,
-    data: Array<string> = ["Cardano", "address", "10000", "1000"]
+    data: Array<string> = ["cardano", "address", "10000", "1000"]
 ) => {
     const sk = wasm.SecretKey.random_dlog();
     const address = wasm.Contract.pay_to_address(sk.get_address());

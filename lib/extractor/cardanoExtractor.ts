@@ -6,8 +6,7 @@ import { ObservationEntityAction } from "../actions/db";
 import { KoiosTransaction, MetaData } from "../interfaces/koiosTransaction";
 import { RosenData } from "../interfaces/rosen";
 import { AbstractExtractor, BlockEntity } from "@rosen-bridge/scanner";
-import { TokenMap } from "@rosen-bridge/tokens";
-import { TokensMap } from "@rosen-bridge/tokens/dist/TokenMap/types";
+import { RosenTokens, TokenMap } from "@rosen-bridge/tokens";
 
 export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransaction>{
     private readonly dataSource: DataSource;
@@ -15,7 +14,7 @@ export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransact
     private readonly actions: ObservationEntityAction;
     static readonly FROM_CHAIN: string = "cardano";
 
-    constructor(dataSource: DataSource, tokens: TokensMap) {
+    constructor(dataSource: DataSource, tokens: RosenTokens) {
         super()
         this.dataSource = dataSource;
         this.tokens = new TokenMap(tokens);
@@ -60,16 +59,17 @@ export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransact
      * Should return the target token hex string id
      * @param policyId
      * @param assetName
+     * @param toChain
      */
-    toTargetToken = (policyId: string, assetName: string, toChain: string): {fingerprint: string, target: string} | undefined => {
-        const tokens = this.tokens.search(CardanoObservationExtractor.FROM_CHAIN, {assetName: assetName, policyId: policyId})
-        if (tokens.length > 0 && Object.keys(tokens[0]).indexOf(toChain) !== -1) {
-            const token = tokens[0];
-            return {
-                fingerprint: token[CardanoObservationExtractor.FROM_CHAIN]['id'],
-                target: token[toChain]['id']
-            }
-        }
+    toTargetToken = (policyId: string, assetName: string, toChain: string): { fromChain: string, toChain: string } => {
+        const tokens = this.tokens.search(CardanoObservationExtractor.FROM_CHAIN, {
+            assetName: assetName,
+            policyId: policyId
+        })[0];
+        return {
+            fromChain: this.tokens.getID(tokens, CardanoObservationExtractor.FROM_CHAIN),
+            toChain: this.tokens.getID(tokens, toChain)
+        };
     }
 
     /**
@@ -90,25 +90,24 @@ export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransact
                                 && transaction.outputs[0].asset_list.length !== 0
                             ) {
                                 const asset = transaction.outputs[0].asset_list[0];
-                                const assetIds = this.toTargetToken(asset.policy_id, asset.asset_name, data.toChain);
-                                if (assetIds !== undefined) {
-                                    const requestId = Buffer.from(blake2b(transaction.tx_hash, undefined, 32)).toString("hex")
-                                    observations.push({
-                                        fromChain: CardanoObservationExtractor.FROM_CHAIN,
-                                        toChain: data.toChain,
-                                        amount: asset.quantity,
-                                        sourceChainTokenId: assetIds.fingerprint,
-                                        targetChainTokenId: assetIds.target,
-                                        sourceTxId: transaction.tx_hash,
-                                        bridgeFee: data.bridgeFee,
-                                        networkFee: data.networkFee,
-                                        sourceBlockId: block.hash,
-                                        requestId: requestId,
-                                        toAddress: data.toAddress,
-                                        fromAddress: transaction.inputs[0].payment_addr.bech32
-                                    })
-                                }
+                                const assetId = this.toTargetToken(asset.policy_id, asset.asset_name, data.toChain);
+                                const requestId = Buffer.from(blake2b(transaction.tx_hash, undefined, 32)).toString("hex")
+                                observations.push({
+                                    fromChain: CardanoObservationExtractor.FROM_CHAIN,
+                                    toChain: data.toChain,
+                                    amount: asset.quantity,
+                                    sourceChainTokenId: assetId.fromChain,
+                                    targetChainTokenId: assetId.toChain,
+                                    sourceTxId: transaction.tx_hash,
+                                    bridgeFee: data.bridgeFee,
+                                    networkFee: data.networkFee,
+                                    sourceBlockId: block.hash,
+                                    requestId: requestId,
+                                    toAddress: data.toAddress,
+                                    fromAddress: transaction.inputs[0].payment_addr.bech32
+                                })
                             }
+
                         }
                     })
                     this.actions.storeObservations(observations, block, this.getId()).then(() => {

@@ -6,16 +6,15 @@ import { ExtractedObservation } from "../interfaces/extractedObservation";
 import { ObservationEntityAction } from "../actions/db";
 import { RosenData } from "../interfaces/rosen";
 import { AbstractExtractor, BlockEntity } from "@rosen-bridge/scanner";
-import { TokenMap } from '@rosen-bridge/tokens'
-import { TokensMap } from '@rosen-bridge/tokens/dist/TokenMap/types'
+import { RosenTokens, TokenMap } from '@rosen-bridge/tokens'
 
-export class ErgoObservationExtractor extends AbstractExtractor<wasm.Transaction> {
+export class ErgoObservationExtractor extends AbstractExtractor<wasm.Transaction>{
     private readonly dataSource: DataSource;
     private readonly tokens: TokenMap;
     private readonly actions: ObservationEntityAction;
     static readonly FROM_CHAIN: string = "ergo";
 
-    constructor(dataSource: DataSource, tokens: TokensMap) {
+    constructor(dataSource: DataSource, tokens: RosenTokens) {
         super()
         this.dataSource = dataSource;
         this.tokens = new TokenMap(tokens);
@@ -52,12 +51,8 @@ export class ErgoObservationExtractor extends AbstractExtractor<wasm.Transaction
      * @param toChain
      */
     toTargetToken = (tokenId: string, toChain: string): string => {
-        const tokens = this.tokens.search(ErgoObservationExtractor.FROM_CHAIN, {tokenId: tokenId})
-        if (tokens.length > 0 && Object.keys(tokens[0]).indexOf(toChain) !== -1) {
-            const token = tokens[0];
-            return token[toChain]['id']
-        }
-        return ""
+        const tokens = this.tokens.search(ErgoObservationExtractor.FROM_CHAIN, {tokenId: tokenId})[0];
+        return this.tokens.getID(tokens, toChain)
     }
 
     /**

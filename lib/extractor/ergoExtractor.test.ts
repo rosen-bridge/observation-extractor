@@ -43,7 +43,7 @@ describe('extractorErgo', () => {
             const extractor = new ExtractorErgo(dataSource, tokens);
             const Tx = observationTxGenerator();
             expect(extractor.getRosenData(Tx.outputs().get(0))).toStrictEqual({
-                toChain: 'Cardano',
+                toChain: 'cardano',
                 toAddress: 'address',
                 bridgeFee: '1000',
                 networkFee: '10000',

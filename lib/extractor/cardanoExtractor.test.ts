@@ -23,7 +23,7 @@ describe("cardanoKoiosObservationExtractor", () => {
                     key: "0",
                     json: JSON.parse(
                         '{' +
-                        '"to": "ERGO",' +
+                        '"to": "ergo",' +
                         '"bridgeFee": "10000",' +
                         '"networkFee": "1000",' +
                         '"toAddress": "ergoAddress",' +
@@ -32,7 +32,7 @@ describe("cardanoKoiosObservationExtractor", () => {
                 }
                 ])
             ).toStrictEqual({
-                toChain: "ERGO",
+                toChain: "ergo",
                 bridgeFee: "10000",
                 networkFee: "1000",
                 toAddress: "ergoAddress",
@@ -94,7 +94,7 @@ describe("cardanoKoiosObservationExtractor", () => {
                 ...cardanoTxValid,
                 metadata: [{
                     key: "0",
-                    json: JSON.parse('{"to": "ERGO","bridgeFee": "10000","toAddress": "ergoAddress","targetChainTokenId": "cardanoTokenId"}')
+                    json: JSON.parse('{"to": "ergo","bridgeFee": "10000","toAddress": "ergoAddress","targetChainTokenId": "cardanoTokenId"}')
                 }]
             };
             const res = await extractor.processTransactions([Tx], generateBlockEntity(dataSource, "1"));
