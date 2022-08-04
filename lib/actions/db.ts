@@ -36,7 +36,7 @@ export class ObservationEntityAction {
             row.extractor = extractor
             return row;
         });
-        let error = false;
+        let success = true;
         const queryRunner = this.datasource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -46,11 +46,11 @@ export class ObservationEntityAction {
         } catch (e) {
             console.log(`An error occurred during store observation action: ${e}`)
             await queryRunner.rollbackTransaction();
-            error = true;
+            success = false;
         } finally {
             await queryRunner.release();
         }
-        return error;
+        return success;
     }
 
     deleteBlockObservation = async (block: string, extractor: string) => {

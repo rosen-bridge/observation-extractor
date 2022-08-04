@@ -46,7 +46,7 @@ describe("ObservationEntityAction", () => {
             const dataSource = await loadDataBase("db");
             const action = new ObservationEntityAction(dataSource);
             const res = await action.storeObservations(observations, generateBlockEntity(dataSource, "1"), "extractor-test");
-            expect(res).toBe(false);
+            expect(res).toBe(true);
             const repository = dataSource.getRepository(ObservationEntity);
             const [, rowsCount] = await repository.findAndCount();
             expect(rowsCount).toBe(2);
