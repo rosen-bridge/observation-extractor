@@ -6,14 +6,19 @@ import { ObservationEntityAction } from "../actions/db";
 import { KoiosTransaction, MetaData } from "../interfaces/koiosTransaction";
 import { RosenData } from "../interfaces/rosen";
 import { AbstractExtractor, BlockEntity } from "@rosen-bridge/scanner";
+import { TokenMap } from "@rosen-bridge/tokens";
+import { TokensMap } from "@rosen-bridge/tokens/dist/TokenMap/types";
 
 export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransaction>{
     private readonly dataSource: DataSource;
+    private readonly tokens: TokenMap;
     private readonly actions: ObservationEntityAction;
+    static readonly FROM_CHAIN: string = "cardano";
 
-    constructor(dataSource: DataSource) {
-        super();
+    constructor(dataSource: DataSource, tokens: TokensMap) {
+        super()
         this.dataSource = dataSource;
+        this.tokens = new TokenMap(tokens);
         this.actions = new ObservationEntityAction(dataSource);
     }
 
@@ -56,10 +61,15 @@ export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransact
      * @param policyId
      * @param assetName
      */
-    mockedAssetIds = (policyId: string, assetName: string): { fingerprint: string, tokenId: string } | undefined => {
-        // TODO must use tokens package
-        console.log(policyId, assetName)
-        return {fingerprint: "f6a69529b12a7e2326acffee8383e0c44408f87a872886fadf410fe8498006d3", tokenId: "ergo"}
+    toTargetToken = (policyId: string, assetName: string, toChain: string): {fingerprint: string, target: string} | undefined => {
+        const tokens = this.tokens.search(CardanoObservationExtractor.FROM_CHAIN, {assetName: assetName, policyId: policyId})
+        if (tokens.length > 0 && Object.keys(tokens[0]).indexOf(toChain) !== -1) {
+            const token = tokens[0];
+            return {
+                fingerprint: token[CardanoObservationExtractor.FROM_CHAIN]['id'],
+                target: token[toChain]['id']
+            }
+        }
     }
 
     /**
@@ -80,15 +90,15 @@ export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransact
                                 && transaction.outputs[0].asset_list.length !== 0
                             ) {
                                 const asset = transaction.outputs[0].asset_list[0];
-                                const assetIds = this.mockedAssetIds(asset.policy_id, asset.asset_name);
+                                const assetIds = this.toTargetToken(asset.policy_id, asset.asset_name, data.toChain);
                                 if (assetIds !== undefined) {
                                     const requestId = Buffer.from(blake2b(transaction.tx_hash, undefined, 32)).toString("hex")
                                     observations.push({
-                                        fromChain: 'CARDANO',
+                                        fromChain: CardanoObservationExtractor.FROM_CHAIN,
                                         toChain: data.toChain,
                                         amount: asset.quantity,
                                         sourceChainTokenId: assetIds.fingerprint,
-                                        targetChainTokenId: assetIds.tokenId,
+                                        targetChainTokenId: assetIds.target,
                                         sourceTxId: transaction.tx_hash,
                                         bridgeFee: data.bridgeFee,
                                         networkFee: data.networkFee,

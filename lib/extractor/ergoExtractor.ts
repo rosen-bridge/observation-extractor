@@ -6,13 +6,19 @@ import { ExtractedObservation } from "../interfaces/extractedObservation";
 import { ObservationEntityAction } from "../actions/db";
 import { RosenData } from "../interfaces/rosen";
 import { AbstractExtractor, BlockEntity } from "@rosen-bridge/scanner";
+import { TokenMap } from '@rosen-bridge/tokens'
+import { TokensMap } from '@rosen-bridge/tokens/dist/TokenMap/types'
 
-export class ErgoObservationExtractor implements AbstractExtractor<wasm.Transaction>{
+export class ErgoObservationExtractor extends AbstractExtractor<wasm.Transaction> {
     private readonly dataSource: DataSource;
+    private readonly tokens: TokenMap;
     private readonly actions: ObservationEntityAction;
+    static readonly FROM_CHAIN: string = "ergo";
 
-    constructor(dataSource: DataSource) {
+    constructor(dataSource: DataSource, tokens: TokensMap) {
+        super()
         this.dataSource = dataSource;
+        this.tokens = new TokenMap(tokens);
         this.actions = new ObservationEntityAction(dataSource);
     }
 
@@ -30,7 +36,7 @@ export class ErgoObservationExtractor implements AbstractExtractor<wasm.Transact
         if (R4 !== undefined
             && box.tokens().len() > 0
             && R4.length >= 4
-            && this.mockedTokenMap(box.tokens().get(0).id().to_str()) != undefined) {
+            && this.toTargetToken(box.tokens().get(0).id().to_str(), Buffer.from(R4[0]).toString()) != undefined) {
             return {
                 toChain: Buffer.from(R4[0]).toString(),
                 toAddress: Buffer.from(R4[1]).toString(),
@@ -43,11 +49,15 @@ export class ErgoObservationExtractor implements AbstractExtractor<wasm.Transact
     /**
      * Should return the target token hex string id
      * @param tokenId
+     * @param toChain
      */
-    mockedTokenMap = (tokenId: string): string => {
-        // TODO must connect to tokens map package
-        console.log(tokenId)
-        return "f6a69529b12a7e2326acffee8383e0c44408f87a872886fadf410fe8498006d3"
+    toTargetToken = (tokenId: string, toChain: string): string => {
+        const tokens = this.tokens.search(ErgoObservationExtractor.FROM_CHAIN, {tokenId: tokenId})
+        if (tokens.length > 0 && Object.keys(tokens[0]).indexOf(toChain) !== -1) {
+            const token = tokens[0];
+            return token[toChain]['id']
+        }
+        return ""
     }
 
     /**
@@ -69,13 +79,13 @@ export class ErgoObservationExtractor implements AbstractExtractor<wasm.Transact
                             const inputAddress = "fromAddress";
                             const requestId = Buffer.from(blake2b(output.tx_id().to_str(), undefined, 32)).toString("hex");
                             observations.push({
-                                fromChain: "Ergo",
+                                fromChain: ErgoObservationExtractor.FROM_CHAIN,
                                 toChain: data.toChain,
                                 networkFee: data.networkFee,
                                 bridgeFee: data.bridgeFee,
                                 amount: token.amount().as_i64().to_str(),
                                 sourceChainTokenId: token.id().to_str(),
-                                targetChainTokenId: this.mockedTokenMap(token.id().to_str()),
+                                targetChainTokenId: this.toTargetToken(token.id().to_str(), data.toChain),
                                 sourceTxId: output.tx_id().to_str(),
                                 sourceBlockId: block.hash,
                                 requestId: requestId,
