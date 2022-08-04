@@ -4,7 +4,7 @@ import { cardanoTxValid, generateBlockEntity, loadDataBase } from "./utils.mock"
 import { ObservationEntity } from "../entities/observationEntity";
 import { tokens } from "./tokens.mocked";
 
-class ExecutorCardano extends CardanoObservationExtractor {
+class ExecutorCardano extends CardanoObservationExtractor{
 }
 
 describe("cardanoKoiosObservationExtractor", () => {
@@ -79,7 +79,7 @@ describe("cardanoKoiosObservationExtractor", () => {
             const repository = dataSource.getRepository(ObservationEntity);
             const [, rowsCount] = await repository.findAndCount();
             expect(rowsCount).toBe(1);
-        }, 1000000)
+        })
 
         /**
          * zero Valid Transaction should save successfully

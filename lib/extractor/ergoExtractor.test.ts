@@ -3,7 +3,7 @@ import { generateBlockEntity, loadDataBase, observationTxGenerator } from "./uti
 import { ObservationEntity } from "../entities/observationEntity";
 import { tokens } from "./tokens.mocked";
 
-class ExtractorErgo extends ErgoObservationExtractor {
+class ExtractorErgo extends ErgoObservationExtractor{
 }
 
 describe('extractorErgo', () => {
@@ -26,7 +26,7 @@ describe('extractorErgo', () => {
             const repository = dataSource.getRepository(ObservationEntity);
             const [, rowsCount] = await repository.findAndCount();
             expect(rowsCount).toBe(2);
-        }, 1000000)
+        })
 
     })
 
