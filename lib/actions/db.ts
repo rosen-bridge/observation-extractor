@@ -1,6 +1,7 @@
 import { ObservationEntity } from "../entities/observationEntity";
 import { DataSource } from "typeorm";
 import { ExtractedObservation } from "../interfaces/extractedObservation";
+import { BlockEntity } from "@rosen-bridge/scanner";
 
 export class ObservationEntityAction {
     private readonly datasource: DataSource;
@@ -13,11 +14,13 @@ export class ObservationEntityAction {
      * It stores list of observations in the dataSource with block id
      * @param observations
      * @param block
+     * @param extractor
      */
-    storeObservations = async (observations: Array<ExtractedObservation>, block: string, extractor: string) => {
+    storeObservations = async (observations: Array<ExtractedObservation>, block: BlockEntity, extractor: string) => {
         const observationEntity = observations.map((observation) => {
             const row = new ObservationEntity();
-            row.block = block;
+            row.block = block.hash;
+            row.height = block.height
             row.bridgeFee = observation.bridgeFee;
             row.amount = observation.amount;
             row.fromAddress = observation.fromAddress;
@@ -33,7 +36,7 @@ export class ObservationEntityAction {
             row.extractor = extractor
             return row;
         });
-        let error = true;
+        let success = true;
         const queryRunner = this.datasource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -43,11 +46,11 @@ export class ObservationEntityAction {
         } catch (e) {
             console.log(`An error occurred during store observation action: ${e}`)
             await queryRunner.rollbackTransaction();
-            error = false;
+            success = false;
         } finally {
             await queryRunner.release();
         }
-        return error;
+        return success;
     }
 
     deleteBlockObservation = async (block: string, extractor: string) => {

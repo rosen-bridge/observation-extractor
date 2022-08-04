@@ -1,7 +1,8 @@
 import { ObservationEntityAction } from "./db";
 import { ObservationEntity } from "../entities/observationEntity";
 import { ExtractedObservation } from "../interfaces/extractedObservation";
-import { loadDataBase } from "../extractor/utils.mock";
+import { generateBlockEntity, loadDataBase } from "../extractor/utils.mock";
+import { BlockEntity } from "@rosen-bridge/scanner";
 
 
 const observations: Array<ExtractedObservation> = [{
@@ -44,7 +45,7 @@ describe("ObservationEntityAction", () => {
         it("checks observations saved successfully", async () => {
             const dataSource = await loadDataBase("db");
             const action = new ObservationEntityAction(dataSource);
-            const res = await action.storeObservations(observations, "1", "extractor-test");
+            const res = await action.storeObservations(observations, generateBlockEntity(dataSource, "1"), "extractor-test");
             expect(res).toBe(true);
             const repository = dataSource.getRepository(ObservationEntity);
             const [, rowsCount] = await repository.findAndCount();
@@ -57,7 +58,7 @@ describe("ObservationEntityAction", () => {
     /**
      * Test when fork a block must deleted from database
      */
-    describe("deleteBlockObservation",  () => {
+    describe("deleteBlockObservation", () => {
         it("should remove only block with specific block id and extractor id", async () => {
             const genHexString = (len = 64) => {
                 const hex = '0123456789ABCDEF';
@@ -69,9 +70,9 @@ describe("ObservationEntityAction", () => {
             }
             const dataSource = await loadDataBase("fork");
             const action = new ObservationEntityAction(dataSource);
-            const insertObservation = async (extractor: string, block: string) => {
-                 await action.storeObservations([{
-                    sourceBlockId: block,
+            const insertObservation = async (extractor: string, block: BlockEntity) => {
+                await action.storeObservations([{
+                    sourceBlockId: block.hash,
                     bridgeFee: "100",
                     networkFee: "1000",
                     amount: "10000",
@@ -85,10 +86,12 @@ describe("ObservationEntityAction", () => {
                     fromChain: genHexString()
                 }], block, extractor)
             }
-            await insertObservation("cardano", "block1")
-            await insertObservation("cardano", "block2")
-            await insertObservation("ergo", "block1")
-            await insertObservation("ergo", "block2")
+            const block1 = generateBlockEntity(dataSource, "block1")
+            const block2 = generateBlockEntity(dataSource, "block2", "block1", 2)
+            await insertObservation("cardano", block1)
+            await insertObservation("cardano", block2)
+            await insertObservation("ergo", block1)
+            await insertObservation("ergo", block2)
             expect((await dataSource.getRepository(ObservationEntity).find()).length).toBe(4)
             await action.deleteBlockObservation("block1", "ergo")
             expect((await dataSource.getRepository(ObservationEntity).find()).length).toBe(3)

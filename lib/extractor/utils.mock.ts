@@ -2,6 +2,8 @@ import { DataSource } from "typeorm";
 import { ObservationEntity } from "../entities/observationEntity";
 import { migrations } from "../migrations";
 import * as wasm from "ergo-lib-wasm-nodejs";
+import { BlockEntity } from "@rosen-bridge/scanner";
+import { migrations as scannerMigrations } from '@rosen-bridge/scanner'
 
 export const last10BlockHeader = [{
     "extensionId": "27143b3ad6607ca59fc6b882a96d999c1147dbedb4caa3c945208318feb6ef76",
@@ -244,11 +246,11 @@ export const last10BlockHeader = [{
         "parentId": "2aeed311b23c92427c16f2262bde3396484e109fcddb4f1a56aa1dd5a7b2113b"
     }];
 
-export const cardanoTxValid={
+export const cardanoTxValid = {
     block_hash: "",
     metadata: [{
         key: "0",
-        json: JSON.parse('{"to": "ERGO","bridgeFee": "10000","networkFee": "10000","toAddress": "ergoAddress","targetChainTokenId": "cardanoTokenId"}')
+        json: JSON.parse('{"to": "ergo","bridgeFee": "10000","networkFee": "10000","toAddress": "ergoAddress","targetChainTokenId": "cardanoTokenId"}')
     }],
     tx_hash: "",
     inputs: [
@@ -319,8 +321,8 @@ export const loadDataBase = async (name: string): Promise<DataSource> => {
     return new DataSource({
         type: "sqlite",
         database: `./sqlite/${name}-test.sqlite`,
-        entities: [ObservationEntity],
-        migrations: migrations,
+        entities: [BlockEntity, ObservationEntity],
+        migrations: [...migrations, ...scannerMigrations],
         synchronize: false,
         logging: false
     }).initialize().then(
@@ -333,7 +335,7 @@ export const loadDataBase = async (name: string): Promise<DataSource> => {
 
 export const observationTxGenerator = (
     hasToken = true,
-    data: Array<string> = ["Cardano", "address", "10000", "1000"]
+    data: Array<string> = ["cardano", "address", "10000", "1000"]
 ) => {
     const sk = wasm.SecretKey.random_dlog();
     const address = wasm.Contract.pay_to_address(sk.get_address());
@@ -397,3 +399,11 @@ export const observationTxGenerator = (
     return wallet.sign_transaction(ctx, tx, unspentBoxes, wasm.ErgoBoxes.from_boxes_json([]))
 }
 
+export const generateBlockEntity = (dataSource: DataSource, hash: string, parent?: string, height?: number) => {
+    const repository = dataSource.getRepository(BlockEntity)
+    return repository.create({
+        height: height ? height : 1,
+        parentHash: parent ? parent : "1",
+        hash: hash
+    })
+}

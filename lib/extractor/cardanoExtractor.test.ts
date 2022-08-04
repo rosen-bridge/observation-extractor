@@ -1,9 +1,10 @@
 import { CardanoObservationExtractor } from "./cardanoExtractor";
 import { KoiosTransaction } from "../interfaces/koiosTransaction";
-import { cardanoTxValid, loadDataBase } from "./utils.mock";
+import { cardanoTxValid, generateBlockEntity, loadDataBase } from "./utils.mock";
 import { ObservationEntity } from "../entities/observationEntity";
+import { tokens } from "./tokens.mocked";
 
-class ExecutorCardano extends CardanoObservationExtractor {
+class ExecutorCardano extends CardanoObservationExtractor{
 }
 
 describe("cardanoKoiosObservationExtractor", () => {
@@ -17,12 +18,12 @@ describe("cardanoKoiosObservationExtractor", () => {
          */
         it('checks valid rosenData', async () => {
             const dataSource = await loadDataBase("getRosenData-cardano");
-            const extractor = new ExecutorCardano(dataSource);
+            const extractor = new ExecutorCardano(dataSource, tokens);
             expect(extractor.getRosenData([{
                     key: "0",
                     json: JSON.parse(
                         '{' +
-                        '"to": "ERGO",' +
+                        '"to": "ergo",' +
                         '"bridgeFee": "10000",' +
                         '"networkFee": "1000",' +
                         '"toAddress": "ergoAddress",' +
@@ -31,7 +32,7 @@ describe("cardanoKoiosObservationExtractor", () => {
                 }
                 ])
             ).toStrictEqual({
-                toChain: "ERGO",
+                toChain: "ergo",
                 bridgeFee: "10000",
                 networkFee: "1000",
                 toAddress: "ergoAddress",
@@ -46,7 +47,7 @@ describe("cardanoKoiosObservationExtractor", () => {
          */
         it('checks invalid rosen data', async () => {
             const dataSource = await loadDataBase("getRosenData-cardano");
-            const extractor = new ExecutorCardano(dataSource);
+            const extractor = new ExecutorCardano(dataSource, tokens);
             expect(extractor.getRosenData([{
                     key: "0",
                     json: JSON.parse(
@@ -71,9 +72,9 @@ describe("cardanoKoiosObservationExtractor", () => {
     describe('processTransactionsCardano', () => {
         it('should returns true valid rosen transaction', async () => {
             const dataSource = await loadDataBase("processTransactionCardano-valid-cardano");
-            const extractor = new ExecutorCardano(dataSource);
+            const extractor = new ExecutorCardano(dataSource, tokens);
             const Tx: KoiosTransaction = cardanoTxValid;
-            const res = await extractor.processTransactions("1", [Tx]);
+            const res = await extractor.processTransactions([Tx], generateBlockEntity(dataSource, "1"));
             expect(res).toBe(true);
             const repository = dataSource.getRepository(ObservationEntity);
             const [, rowsCount] = await repository.findAndCount();
@@ -88,15 +89,15 @@ describe("cardanoKoiosObservationExtractor", () => {
          */
         it('should returns false invalid rosen metadata', async () => {
             const dataSource = await loadDataBase("processTransactionCardano-invalid-cardano");
-            const extractor = new ExecutorCardano(dataSource);
+            const extractor = new ExecutorCardano(dataSource, tokens);
             const Tx: KoiosTransaction = {
                 ...cardanoTxValid,
                 metadata: [{
                     key: "0",
-                    json: JSON.parse('{"to": "ERGO","bridgeFee": "10000","toAddress": "ergoAddress","targetChainTokenId": "cardanoTokenId"}')
+                    json: JSON.parse('{"to": "ergo","bridgeFee": "10000","toAddress": "ergoAddress","targetChainTokenId": "cardanoTokenId"}')
                 }]
             };
-            const res = await extractor.processTransactions("1", [Tx]);
+            const res = await extractor.processTransactions([Tx], generateBlockEntity(dataSource, "1"));
             expect(res).toBe(true);
             const repository = dataSource.getRepository(ObservationEntity);
             const [, rowsCount] = await repository.findAndCount();

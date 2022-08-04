@@ -5,13 +5,19 @@ import { blake2b } from "blakejs";
 import { ExtractedObservation } from "../interfaces/extractedObservation";
 import { ObservationEntityAction } from "../actions/db";
 import { RosenData } from "../interfaces/rosen";
+import { AbstractExtractor, BlockEntity } from "@rosen-bridge/scanner";
+import { RosenTokens, TokenMap } from '@rosen-bridge/tokens'
 
-export class ErgoObservationExtractor {
+export class ErgoObservationExtractor extends AbstractExtractor<wasm.Transaction>{
     private readonly dataSource: DataSource;
+    private readonly tokens: TokenMap;
     private readonly actions: ObservationEntityAction;
+    static readonly FROM_CHAIN: string = "ergo";
 
-    constructor(dataSource: DataSource) {
+    constructor(dataSource: DataSource, tokens: RosenTokens) {
+        super()
         this.dataSource = dataSource;
+        this.tokens = new TokenMap(tokens);
         this.actions = new ObservationEntityAction(dataSource);
     }
 
@@ -29,7 +35,7 @@ export class ErgoObservationExtractor {
         if (R4 !== undefined
             && box.tokens().len() > 0
             && R4.length >= 4
-            && this.mockedTokenMap(box.tokens().get(0).id().to_str()) != undefined) {
+            && this.toTargetToken(box.tokens().get(0).id().to_str(), Buffer.from(R4[0]).toString()) != undefined) {
             return {
                 toChain: Buffer.from(R4[0]).toString(),
                 toAddress: Buffer.from(R4[1]).toString(),
@@ -42,19 +48,20 @@ export class ErgoObservationExtractor {
     /**
      * Should return the target token hex string id
      * @param tokenId
+     * @param toChain
      */
-    mockedTokenMap = (tokenId: string): string => {
-        // TODO must connect to tokens map package
-        return "f6a69529b12a7e2326acffee8383e0c44408f87a872886fadf410fe8498006d3"
+    toTargetToken = (tokenId: string, toChain: string): string => {
+        const tokens = this.tokens.search(ErgoObservationExtractor.FROM_CHAIN, {tokenId: tokenId})[0];
+        return this.tokens.getID(tokens, toChain)
     }
 
     /**
      * gets block id and transactions corresponding to the block and saves if they are valid rosen
      *  transactions and in case of success return true and in case of failure returns false
-     * @param blockId
      * @param txs
+     * @param block
      */
-    processTransactions = (txs: Array<wasm.Transaction>, blockId: string): Promise<boolean> => {
+    processTransactions = (txs: Array<wasm.Transaction>, block: BlockEntity): Promise<boolean> => {
         return new Promise((resolve, reject) => {
             try {
                 const observations: Array<ExtractedObservation> = [];
@@ -67,15 +74,15 @@ export class ErgoObservationExtractor {
                             const inputAddress = "fromAddress";
                             const requestId = Buffer.from(blake2b(output.tx_id().to_str(), undefined, 32)).toString("hex");
                             observations.push({
-                                fromChain: "Ergo",
+                                fromChain: ErgoObservationExtractor.FROM_CHAIN,
                                 toChain: data.toChain,
                                 networkFee: data.networkFee,
                                 bridgeFee: data.bridgeFee,
                                 amount: token.amount().as_i64().to_str(),
                                 sourceChainTokenId: token.id().to_str(),
-                                targetChainTokenId: this.mockedTokenMap(token.id().to_str()),
+                                targetChainTokenId: this.toTargetToken(token.id().to_str(), data.toChain),
                                 sourceTxId: output.tx_id().to_str(),
-                                sourceBlockId: blockId,
+                                sourceBlockId: block.hash,
                                 requestId: requestId,
                                 toAddress: data.toAddress,
                                 fromAddress: inputAddress,
@@ -83,7 +90,7 @@ export class ErgoObservationExtractor {
                         }
                     }
                 })
-                this.actions.storeObservations(observations, blockId, this.getId()).then((status) => {
+                this.actions.storeObservations(observations, block, this.getId()).then((status) => {
                     resolve(status)
                 }).catch((e) => {
                     console.log(`An error uncached exception occurred during store ergo observation: ${e}`);
