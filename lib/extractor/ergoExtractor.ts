@@ -31,17 +31,21 @@ export class ErgoObservationExtractor extends AbstractExtractor<wasm.Transaction
      * @param box
      */
     getRosenData = (box: wasm.ErgoBox): RosenData | undefined => {
-        const R4 = box.register_value(wasm.NonMandatoryRegisterId.R4)?.to_coll_coll_byte();
-        if (R4 !== undefined
-            && box.tokens().len() > 0
-            && R4.length >= 4
-            && this.toTargetToken(box.tokens().get(0).id().to_str(), Buffer.from(R4[0]).toString()) != undefined) {
-            return {
-                toChain: Buffer.from(R4[0]).toString(),
-                toAddress: Buffer.from(R4[1]).toString(),
-                networkFee: Buffer.from(R4[2]).toString(),
-                bridgeFee: Buffer.from(R4[3]).toString(),
+        try {
+            const R4 = box.register_value(wasm.NonMandatoryRegisterId.R4)?.to_coll_coll_byte();
+            if (R4 !== undefined
+                && box.tokens().len() > 0
+                && R4.length >= 4
+                && this.toTargetToken(box.tokens().get(0).id().to_str(), Buffer.from(R4[0]).toString()) != undefined) {
+                return {
+                    toChain: Buffer.from(R4[0]).toString(),
+                    toAddress: Buffer.from(R4[1]).toString(),
+                    networkFee: Buffer.from(R4[2]).toString(),
+                    bridgeFee: Buffer.from(R4[3]).toString(),
+                }
             }
+        } catch {
+            return undefined
         }
     }
 
