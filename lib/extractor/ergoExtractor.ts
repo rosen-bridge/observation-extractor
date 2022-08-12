@@ -49,6 +49,7 @@ export class ErgoObservationExtractor extends AbstractExtractor<wasm.Transaction
         } catch {
             return undefined
         }
+        return undefined
     }
 
     /**
