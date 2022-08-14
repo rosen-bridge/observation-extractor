@@ -20,7 +20,7 @@ export class ObservationEntityAction {
         const observationEntity = observations.map((observation) => {
             const row = new ObservationEntity();
             row.block = block.hash;
-            row.height = block.height
+            row.height = block.height;
             row.bridgeFee = observation.bridgeFee;
             row.amount = observation.amount;
             row.fromAddress = observation.fromAddress;
