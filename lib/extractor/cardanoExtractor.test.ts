@@ -118,7 +118,7 @@ describe("cardanoKoiosObservationExtractor", () => {
                 ...cardanoTxValid,
                 metadata: [{
                     key: "0",
-                    json: JSON.parse('{"to": "ergo","bridgeFee": "10000","toAddress": "ergoAddress","targetChainTokenId": "cardanoTokenId"}'),
+                    json: JSON.parse('{"to": "ergo","bridgeFee": "10000","toAddress": "ergoAddress","targetChainTokenId": "cardanoTokenId"}')
                 }]
             };
             const res = await extractor.processTransactions([Tx], generateBlockEntity(dataSource, "1"));
