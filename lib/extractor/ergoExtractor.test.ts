@@ -15,7 +15,8 @@ describe('extractorErgo', () => {
          * 1 Valid Transaction should save successfully
          * Dependency: action.storeObservations
          * Scenario: one valid observation should save successfully
-         * Expected: processTransactions should returns true and database row count should be 1
+         * Expected: processTransactions should returns true and database row count should be 1 and database fields
+         *  should fulfill expected values
          */
         it('checks valid transaction', async () => {
             const dataSource = await loadDataBase("processTransactionErgo");

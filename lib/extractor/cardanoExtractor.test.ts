@@ -69,7 +69,8 @@ describe("cardanoKoiosObservationExtractor", () => {
      * one Valid Transaction should save successfully
      * Dependency: action.storeObservations
      * Scenario: one observation should save successfully
-     * Expected: processTransactions should returns true and database row count should be 1
+     * Expected: processTransactions should returns true and database row count should be 1 and dataBase
+     *  field should fulfill expected values
      */
     describe('processTransactionsCardano', () => {
         it('should returns true valid rosen transaction', async () => {
