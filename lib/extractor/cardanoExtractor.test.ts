@@ -3,6 +3,8 @@ import { KoiosTransaction } from "../interfaces/koiosTransaction";
 import { cardanoTxValid, generateBlockEntity, loadDataBase } from "./utils.mock";
 import { ObservationEntity } from "../entities/observationEntity";
 import { tokens } from "./tokens.mocked";
+import { Buffer } from "buffer";
+import { blake2b } from "blakejs";
 
 class ExecutorCardano extends CardanoObservationExtractor{
 }
@@ -67,7 +69,8 @@ describe("cardanoKoiosObservationExtractor", () => {
      * one Valid Transaction should save successfully
      * Dependency: action.storeObservations
      * Scenario: one observation should save successfully
-     * Expected: processTransactions should returns true and database row count should be 1
+     * Expected: processTransactions should returns true and database row count should be 1 and dataBase
+     *  field should fulfill expected values
      */
     describe('processTransactionsCardano', () => {
         it('should returns true valid rosen transaction', async () => {
@@ -77,8 +80,30 @@ describe("cardanoKoiosObservationExtractor", () => {
             const res = await extractor.processTransactions([Tx], generateBlockEntity(dataSource, "1"));
             expect(res).toBe(true);
             const repository = dataSource.getRepository(ObservationEntity);
-            const [, rowsCount] = await repository.findAndCount();
+            const [rows, rowsCount] = await repository.findAndCount();
             expect(rowsCount).toBe(1);
+            const observation1 = rows[0];
+            const txHash = "9f00d372e930d685c3b410a10f2bd035cd9a927c4fd8ef8e419c79b210af7ba6";
+            expect(observation1).toEqual({
+                id: 1,
+                fromChain: 'cardano',
+                toChain: 'ergo',
+                //TODO:should fixed after guard fixed
+                fromAddress: "addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0",
+                toAddress: "ergoAddress",
+                height: 1,
+                amount: "10",
+                networkFee: "10000",
+                bridgeFee: "10000",
+                sourceChainTokenId: "fingerPrint",
+                targetChainTokenId: "ergo",
+                sourceBlockId: '1',
+                sourceTxId: txHash,
+                block: '1',
+                requestId: Buffer.from(blake2b(txHash, undefined, 32)).toString("hex"),
+                status: 1,
+                extractor: 'ergo-cardano-koios-extractor'
+            });
         })
 
         /**

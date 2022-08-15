@@ -2,6 +2,8 @@ import { ErgoObservationExtractor } from "./ergoExtractor";
 import { generateBlockEntity, loadDataBase, observationTxGenerator } from "./utils.mock";
 import { ObservationEntity } from "../entities/observationEntity";
 import { tokens } from "./tokens.mocked";
+import { Buffer } from "buffer";
+import { blake2b } from "blakejs";
 
 class ExtractorErgo extends ErgoObservationExtractor{
 }
@@ -10,22 +12,44 @@ describe('extractorErgo', () => {
     describe('processTransactions', () => {
 
         /**
-         * 2 Valid Transaction should save successfully
+         * 1 Valid Transaction should save successfully
          * Dependency: action.storeObservations
-         * Scenario: two valid observation should save successfully
-         * Expected: processTransactions should returns true and database row count should be 2
+         * Scenario: one valid observation should save successfully
+         * Expected: processTransactions should returns true and database row count should be 1 and database fields
+         *  should fulfill expected values
          */
         it('checks valid transaction', async () => {
             const dataSource = await loadDataBase("processTransactionErgo");
             const extractor = new ExtractorErgo(dataSource, tokens);
             const Tx1 = observationTxGenerator();
-            const Tx2 = observationTxGenerator();
             const Tx3 = observationTxGenerator(false);
-            const res = await extractor.processTransactions([Tx1, Tx2, Tx3], generateBlockEntity(dataSource, "1"));
+            const res = await extractor.processTransactions([Tx1, Tx3], generateBlockEntity(dataSource, "1"));
             expect(res).toBeTruthy();
             const repository = dataSource.getRepository(ObservationEntity);
-            const [, rowsCount] = await repository.findAndCount();
-            expect(rowsCount).toBe(2);
+            const [rows, rowsCount] = await repository.findAndCount();
+            expect(rowsCount).toBe(1);
+            const observation1 = rows[0];
+            const box1 = Tx1.outputs().get(0);
+            expect(observation1).toEqual({
+                id: 1,
+                fromChain: 'ergo',
+                toChain: 'cardano',
+                //TODO:should fixed after guard fixed
+                fromAddress: "fromAddress",
+                toAddress: "address",
+                height: 1,
+                amount: box1.tokens().get(0).amount().as_i64().to_str(),
+                networkFee: "10000",
+                bridgeFee: "1000",
+                sourceChainTokenId: box1.tokens().get(0).id().to_str(),
+                targetChainTokenId: "cardano",
+                sourceBlockId: '1',
+                sourceTxId: box1.tx_id().to_str(),
+                requestId: Buffer.from(blake2b(box1.tx_id().to_str(), undefined, 32)).toString("hex"),
+                block: '1',
+                status: 1,
+                extractor: 'ergo-observation-extractor'
+            });
         })
 
     })
