@@ -1,5 +1,5 @@
 {
-  "bail": 1,
+  "bail": 0,
   "verbose": true,
   "testEnvironment": "node",
   "transform": {
