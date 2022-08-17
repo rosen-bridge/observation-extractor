@@ -22,6 +22,7 @@ export class networkModelMigration1658414485911 implements MigrationInterface{
                     "requestId" varchar NOT NULL, 
                     "block" varchar NOT NULL,
                     "extractor" varchar NOT NULL,
+                    "status" varchar CHECK( "status" IN ('0','1','2','3','4','5') ) NOT NULL, 
                     CONSTRAINT "UQ_f0af4ab9dd56c983ce8a83adcbf" UNIQUE ("requestId") 
                 )`
         );
