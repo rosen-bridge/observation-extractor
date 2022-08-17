@@ -1,13 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-export enum TxStatus {
-    TIMED_OUT = 0,
-    NOT_COMMITTED = 1,
-    COMMITMENT_SENT = 2,
-    COMMITTED = 3,
-    REVEAL_SENT = 4,
-    REVEALED = 5,
-}
 
 @Entity()
 export class ObservationEntity{
@@ -59,12 +51,6 @@ export class ObservationEntity{
 
     @Column()
     block: string;
-
-    @Column({
-        type: 'simple-enum',
-        enum: TxStatus
-    })
-    status: TxStatus
 
     @Column()
     extractor: string;

@@ -34,7 +34,6 @@ describe('extractorErgo', () => {
                 id: 1,
                 fromChain: 'ergo',
                 toChain: 'cardano',
-                //TODO:should fixed after guard fixed
                 fromAddress: "fromAddress",
                 toAddress: "address",
                 height: 1,
@@ -47,7 +46,6 @@ describe('extractorErgo', () => {
                 sourceTxId: box1.tx_id().to_str(),
                 requestId: Buffer.from(blake2b(box1.tx_id().to_str(), undefined, 32)).toString("hex"),
                 block: '1',
-                status: 1,
                 extractor: 'ergo-observation-extractor'
             });
         })

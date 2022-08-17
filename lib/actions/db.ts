@@ -1,4 +1,4 @@
-import { ObservationEntity, TxStatus } from "../entities/observationEntity";
+import { ObservationEntity } from "../entities/observationEntity";
 import { DataSource } from "typeorm";
 import { ExtractedObservation } from "../interfaces/extractedObservation";
 import { BlockEntity } from "@rosen-bridge/scanner";
@@ -34,7 +34,6 @@ export class ObservationEntityAction{
             row.targetChainTokenId = observation.targetChainTokenId;
             row.toAddress = observation.toAddress;
             row.extractor = extractor
-            row.status = TxStatus.NOT_COMMITTED;
             return row;
         });
         let success = true;
