@@ -88,7 +88,6 @@ describe("cardanoKoiosObservationExtractor", () => {
                 id: 1,
                 fromChain: 'cardano',
                 toChain: 'ergo',
-                //TODO:should fixed after guard fixed
                 fromAddress: "addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0",
                 toAddress: "ergoAddress",
                 height: 1,
@@ -101,7 +100,6 @@ describe("cardanoKoiosObservationExtractor", () => {
                 sourceTxId: txHash,
                 block: '1',
                 requestId: Buffer.from(blake2b(txHash, undefined, 32)).toString("hex"),
-                status: 1,
                 extractor: 'ergo-cardano-koios-extractor'
             });
         })
