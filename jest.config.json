@@ -2,6 +2,7 @@
   "bail": 1,
   "verbose": true,
   "testEnvironment": "node",
+  "testRunner": "jasmine2",
   "transform": {
     "^.+\\.ts?$": "ts-jest"
   }

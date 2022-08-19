@@ -21,8 +21,7 @@ export class networkModelMigration1658414485911 implements MigrationInterface{
                     "sourceBlockId" varchar NOT NULL, 
                     "requestId" varchar NOT NULL, 
                     "block" varchar NOT NULL,
-                    "extractor" varchar NOT NULL,
-                    CONSTRAINT "UQ_f0af4ab9dd56c983ce8a83adcbf" UNIQUE ("requestId") 
+                    "extractor" varchar NOT NULL
                 )`
         );
     }

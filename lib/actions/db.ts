@@ -1,13 +1,15 @@
 import { ObservationEntity } from "../entities/observationEntity";
-import { DataSource } from "typeorm";
+import { DataSource, In, Repository } from "typeorm";
 import { ExtractedObservation } from "../interfaces/extractedObservation";
 import { BlockEntity } from "@rosen-bridge/scanner";
 
 export class ObservationEntityAction{
     private readonly datasource: DataSource;
+    private readonly observationRepository: Repository<ObservationEntity>;
 
     constructor(dataSource: DataSource) {
         this.datasource = dataSource;
+        this.observationRepository = dataSource.getRepository(ObservationEntity);
     }
 
     /**
@@ -17,31 +19,49 @@ export class ObservationEntityAction{
      * @param extractor
      */
     storeObservations = async (observations: Array<ExtractedObservation>, block: BlockEntity, extractor: string) => {
-        const observationEntity = observations.map((observation) => {
-            const row = new ObservationEntity();
-            row.block = block.hash;
-            row.height = block.height;
-            row.bridgeFee = observation.bridgeFee;
-            row.amount = observation.amount;
-            row.fromAddress = observation.fromAddress;
-            row.fromChain = observation.fromChain;
-            row.networkFee = observation.networkFee;
-            row.requestId = observation.requestId;
-            row.sourceBlockId = observation.sourceBlockId;
-            row.sourceTxId = observation.sourceTxId;
-            row.toChain = observation.toChain;
-            row.sourceChainTokenId = observation.sourceChainTokenId;
-            row.targetChainTokenId = observation.targetChainTokenId;
-            row.toAddress = observation.toAddress;
-            row.extractor = extractor
-            return row;
-        });
+        const requestIds = observations.map(item => item.requestId)
+        const savedObservations = await this.observationRepository.findBy({
+            requestId: In(requestIds),
+            extractor: extractor
+        })
         let success = true;
         const queryRunner = this.datasource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
-            await queryRunner.manager.save(observationEntity);
+            for (const observation of observations) {
+                const saved = savedObservations.some((entity) => {
+                    return entity.requestId === observation.requestId
+                })
+                const entity = {
+                    block: block.hash,
+                    height: block.height,
+                    bridgeFee: observation.bridgeFee,
+                    amount: observation.amount,
+                    fromAddress: observation.fromAddress,
+                    fromChain: observation.fromChain,
+                    networkFee: observation.networkFee,
+                    requestId: observation.requestId,
+                    sourceBlockId: observation.sourceBlockId,
+                    sourceTxId: observation.sourceTxId,
+                    toChain: observation.toChain,
+                    sourceChainTokenId: observation.sourceChainTokenId,
+                    targetChainTokenId: observation.targetChainTokenId,
+                    toAddress: observation.toAddress,
+                    extractor: extractor
+                }
+                if (!saved) {
+                    await queryRunner.manager.insert(ObservationEntity, entity);
+                } else {
+                    await queryRunner.manager.update(
+                        ObservationEntity,
+                        {
+                            requestId: observation.requestId
+                        },
+                        entity
+                    )
+                }
+            }
             await queryRunner.commitTransaction();
         } catch (e) {
             console.log(`An error occurred during store observation action: ${e}`)

@@ -333,6 +333,10 @@ export const loadDataBase = async (name: string): Promise<DataSource> => {
     );
 }
 
+export const clearDB = async (dataSource: DataSource) => {
+    await dataSource.getRepository(ObservationEntity).clear();
+}
+
 export const observationTxGenerator = (
     hasToken = true,
     data: Array<string> = ["cardano", "address", "10000", "1000"]

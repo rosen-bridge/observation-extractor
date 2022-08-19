@@ -46,7 +46,7 @@ export class ObservationEntity{
     @Column()
     sourceBlockId: string
 
-    @Column({unique: true})
+    @Column()
     requestId: string
 
     @Column()

@@ -1,55 +1,216 @@
 import { ObservationEntityAction } from "./db";
 import { ObservationEntity } from "../entities/observationEntity";
-import { ExtractedObservation } from "../interfaces/extractedObservation";
-import { generateBlockEntity, loadDataBase } from "../extractor/utils.mock";
+import { clearDB, generateBlockEntity, loadDataBase } from "../extractor/utils.mock";
 import { BlockEntity } from "@rosen-bridge/scanner";
+import { DataSource } from "typeorm";
+import { firstObservations, secondObservations } from "../extractor/observations.mock";
+import anything = jasmine.anything;
 
 
-const observations: Array<ExtractedObservation> = [{
-    fromChain: "erg",
-    toChain: "cardano",
-    fromAddress: "ErgoAddress",
-    toAddress: "cardanoAddress",
-    amount: "1000000000",
-    bridgeFee: "1000000",
-    networkFee: "1000000",
-    sourceChainTokenId: "ergoTokenId",
-    targetChainTokenId: "cardanoTokenId",
-    sourceTxId: "ergoTxId1",
-    sourceBlockId: "ergoBlockId",
-    requestId: "reqId1",
-}, {
-    fromChain: "erg",
-    toChain: "cardano",
-    fromAddress: "ergoAddress",
-    toAddress: "cardanoAddress",
-    amount: "1100000000",
-    bridgeFee: "1000000",
-    networkFee: "1000000",
-    sourceChainTokenId: "ergoTokenId",
-    targetChainTokenId: "cardanoTokenId",
-    sourceTxId: "ergoTxId2",
-    sourceBlockId: "ergoBlockId",
-    requestId: "reqId2",
-}];
+let dataSource: DataSource;
 
 describe("ObservationEntityAction", () => {
+
+    beforeAll(async () => {
+        dataSource = await loadDataBase("storeObservation");
+    });
+
+    afterEach(async () => {
+        await clearDB(dataSource);
+    });
+
     describe("storeObservation", () => {
 
         /**
          * 2 valid Observations should save successfully
          * Dependency: Nothing
          * Scenario: 2 observation should save successfully
-         * Expected: storeObservations should returns true and database row count should be 2
+         * Expected: storeObservations should returns true and database row count should be 2 and each row should save
+         *  observations correctly
          */
         it("checks observations saved successfully", async () => {
-            const dataSource = await loadDataBase("db");
             const action = new ObservationEntityAction(dataSource);
-            const res = await action.storeObservations(observations, generateBlockEntity(dataSource, "1"), "extractor-test");
+            const res = await action.storeObservations(
+                firstObservations,
+                generateBlockEntity(dataSource, "1"),
+                "extractor-test"
+            );
             expect(res).toBe(true);
             const repository = dataSource.getRepository(ObservationEntity);
-            const [, rowsCount] = await repository.findAndCount();
+            const [rows, rowsCount] = await repository.findAndCount();
             expect(rowsCount).toBe(2);
+            expect(rows[0]).toEqual({
+                ...firstObservations[0],
+                block: "1",
+                extractor: "extractor-test",
+                height: 1,
+                id: anything()
+            })
+            expect(rows[1]).toEqual({
+                ...firstObservations[1],
+                block: "1",
+                extractor: "extractor-test",
+                height: 1,
+                id: anything()
+            })
+        })
+
+        /**
+         * observations with different extractor should save successfully
+         * Dependency: Nothing
+         * Scenario: 2 extractor exist and each one save 2 different observations
+         * Expected: storeObservations should returns true and each saved observation should have valid fields
+         */
+        it("checks that observations saved successfully with two different extractor", async () => {
+            const action = new ObservationEntityAction(dataSource);
+            let res = await action.storeObservations(
+                firstObservations,
+                generateBlockEntity(dataSource, "1"),
+                "first-extractor"
+            );
+            expect(res).toBe(true);
+            res = await action.storeObservations(
+                secondObservations,
+                generateBlockEntity(dataSource, "1"),
+                "second-extractor"
+            );
+            expect(res).toBe(true);
+            const repository = dataSource.getRepository(ObservationEntity);
+            const [rows, rowsCount] = await repository.findAndCount();
+            expect(rowsCount).toBe(4);
+            expect(rows[0]).toEqual({
+                ...firstObservations[0],
+                block: "1",
+                extractor: "first-extractor",
+                height: 1,
+                id: anything()
+            });
+            expect(rows[1]).toEqual({
+                ...firstObservations[1],
+                block: "1",
+                extractor: "first-extractor",
+                height: 1,
+                id: anything()
+            })
+            expect(rows[2]).toEqual({
+                ...secondObservations[0],
+                block: "1",
+                extractor: "second-extractor",
+                height: 1,
+                id: anything()
+            })
+            expect(rows[3]).toEqual({
+                ...secondObservations[1],
+                block: "1",
+                extractor: "second-extractor",
+                height: 1,
+                id: anything()
+            })
+
+        })
+
+        /**
+         * duplicated observation field should update
+         * Dependency: Nothing
+         * Scenario: 2 observation added to the table and then another observation with same 'requestId' but different
+         *  'toAddress' field added to table
+         * Expected: storeObservations should returns true and each saved observation should have valid observation in
+         *  each step
+         */
+        it("checks that duplicated observation updated with same extractor", async () => {
+            const action = new ObservationEntityAction(dataSource);
+            let res = await action.storeObservations(
+                firstObservations,
+                generateBlockEntity(dataSource, "1"),
+                "first-extractor"
+            );
+            expect(res).toBe(true);
+            const repository = dataSource.getRepository(ObservationEntity);
+            let [rows, rowsCount] = await repository.findAndCount();
+            expect(rowsCount).toBe(2);
+            expect(rows[0]).toEqual({
+                ...firstObservations[0],
+                block: "1",
+                extractor: "first-extractor",
+                height: 1,
+                id: anything()
+            });
+            expect(rows[1]).toEqual({
+                ...firstObservations[1],
+                block: "1",
+                extractor: "first-extractor",
+                height: 1,
+                id: anything()
+            })
+            res = await action.storeObservations(
+                [{...firstObservations[0], toAddress: "newAddress"}],
+                generateBlockEntity(dataSource, "1"),
+                "first-extractor"
+            );
+            expect(res).toBe(true);
+            [rows, rowsCount] = await repository.findAndCount();
+            expect(rowsCount).toBe(2);
+            expect(rows[0]).toEqual({
+                ...firstObservations[0],
+                block: "1",
+                extractor: "first-extractor",
+                height: 1,
+                toAddress: "newAddress",
+                id: anything()
+            });
+
+        })
+
+        /**
+         * two observation with same requestId but different extractor added to the table
+         * Dependency: Nothing
+         * Scenario: 2 observation added to the table and then another observation with same 'requestId' but different
+         *  'observation' & 'toAddress' field added to table
+         * Expected: storeObservations should returns true and each saved observation should have valid observation in
+         *  each step
+         */
+        it("checks that duplicated observation updated with same extractor", async () => {
+            const action = new ObservationEntityAction(dataSource);
+            let res = await action.storeObservations(
+                firstObservations,
+                generateBlockEntity(dataSource, "1"),
+                "first-extractor"
+            );
+            expect(res).toBe(true);
+            const repository = dataSource.getRepository(ObservationEntity);
+            let [rows, rowsCount] = await repository.findAndCount();
+            expect(rowsCount).toBe(2);
+            expect(rows[0]).toEqual({
+                ...firstObservations[0],
+                block: "1",
+                extractor: "first-extractor",
+                height: 1,
+                id: anything()
+            });
+            expect(rows[1]).toEqual({
+                ...firstObservations[1],
+                block: "1",
+                extractor: "first-extractor",
+                height: 1,
+                id: anything()
+            })
+            res = await action.storeObservations(
+                [{...firstObservations[0], toAddress: "newAddress"}],
+                generateBlockEntity(dataSource, "1"),
+                "second-extractor"
+            );
+            expect(res).toBe(true);
+            [rows, rowsCount] = await repository.findAndCount();
+            expect(rowsCount).toBe(3);
+            expect(rows[2]).toEqual({
+                ...firstObservations[0],
+                block: "1",
+                extractor: "second-extractor",
+                height: 1,
+                toAddress: "newAddress",
+                id: anything()
+            });
+
         })
 
     })
