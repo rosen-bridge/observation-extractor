@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 
 @Entity()
+@Unique("requestConstraint", ["requestId", "extractor"])
 export class ObservationEntity{
     @PrimaryGeneratedColumn()
     id: number

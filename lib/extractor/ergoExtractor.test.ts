@@ -27,7 +27,7 @@ describe('extractorErgo', () => {
             expect(res).toBeTruthy();
             const repository = dataSource.getRepository(ObservationEntity);
             const [rows, rowsCount] = await repository.findAndCount();
-            expect(rowsCount).toBe(1);
+            expect(rowsCount).toEqual(1);
             const observation1 = rows[0];
             const box1 = Tx1.outputs().get(0);
             expect(observation1).toEqual({
@@ -82,7 +82,7 @@ describe('extractorErgo', () => {
             const dataSource = await loadDataBase("getRosenData");
             const extractor = new ExtractorErgo(dataSource, tokens);
             const Tx = observationTxGenerator(false);
-            expect(extractor.getRosenData(Tx.outputs().get(0))).toBe(undefined)
+            expect(extractor.getRosenData(Tx.outputs().get(0))).toEqual(undefined)
         })
 
         /**
@@ -95,7 +95,7 @@ describe('extractorErgo', () => {
             const dataSource = await loadDataBase("getRosenData");
             const extractor = new ExtractorErgo(dataSource, tokens);
             const Tx = observationTxGenerator(true, ["Cardano", "address", "10000"]);
-            expect(extractor.getRosenData(Tx.outputs().get(0))).toBe(undefined)
+            expect(extractor.getRosenData(Tx.outputs().get(0))).toEqual(undefined)
         })
     })
 })

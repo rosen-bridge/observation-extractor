@@ -61,7 +61,7 @@ describe("cardanoKoiosObservationExtractor", () => {
                         '}')
                 }
                 ])
-            ).toBe(undefined)
+            ).toEqual(undefined)
         })
     })
 
@@ -78,10 +78,10 @@ describe("cardanoKoiosObservationExtractor", () => {
             const extractor = new ExecutorCardano(dataSource, tokens);
             const Tx: KoiosTransaction = cardanoTxValid;
             const res = await extractor.processTransactions([Tx], generateBlockEntity(dataSource, "1"));
-            expect(res).toBe(true);
+            expect(res).toEqual(true);
             const repository = dataSource.getRepository(ObservationEntity);
             const [rows, rowsCount] = await repository.findAndCount();
-            expect(rowsCount).toBe(1);
+            expect(rowsCount).toEqual(1);
             const observation1 = rows[0];
             const txHash = "9f00d372e930d685c3b410a10f2bd035cd9a927c4fd8ef8e419c79b210af7ba6";
             expect(observation1).toEqual({
@@ -121,10 +121,10 @@ describe("cardanoKoiosObservationExtractor", () => {
                 }]
             };
             const res = await extractor.processTransactions([Tx], generateBlockEntity(dataSource, "1"));
-            expect(res).toBe(true);
+            expect(res).toEqual(true);
             const repository = dataSource.getRepository(ObservationEntity);
             const [, rowsCount] = await repository.findAndCount();
-            expect(rowsCount).toBe(0);
+            expect(rowsCount).toEqual(0);
         })
     })
 })
