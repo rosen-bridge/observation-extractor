@@ -19,6 +19,7 @@ export class ObservationEntityAction{
      * @param extractor
      */
     storeObservations = async (observations: Array<ExtractedObservation>, block: BlockEntity, extractor: string) => {
+        if (observations.length === 0) return true;
         const requestIds = observations.map(item => item.requestId)
         const savedObservations = await this.observationRepository.findBy({
             requestId: In(requestIds),
