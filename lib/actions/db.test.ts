@@ -1,21 +1,10 @@
 import { ObservationEntityAction } from "./db";
 import { ObservationEntity } from "../entities/observationEntity";
-import { clearDB, generateBlockEntity, loadDataBase } from "../extractor/utils.mock";
+import { generateBlockEntity, loadDataBase } from "../extractor/utils.mock";
 import { BlockEntity } from "@rosen-bridge/scanner";
-import { DataSource } from "typeorm";
 import { firstObservations, secondObservations } from "../extractor/observations.mock";
 
-let dataSource: DataSource;
-
 describe("ObservationEntityAction", () => {
-
-    beforeAll(async () => {
-        dataSource = await loadDataBase("storeObservation");
-    });
-
-    afterEach(async () => {
-        await clearDB(dataSource);
-    });
 
     describe("storeObservation", () => {
 
@@ -27,6 +16,7 @@ describe("ObservationEntityAction", () => {
          *  observations correctly
          */
         it("checks observations saved successfully", async () => {
+            const dataSource = await loadDataBase("savingObservation");
             const action = new ObservationEntityAction(dataSource);
             const res = await action.storeObservations(
                 firstObservations,
@@ -60,6 +50,7 @@ describe("ObservationEntityAction", () => {
          * Expected: storeObservations should returns true and each saved observation should have valid fields
          */
         it("checks that observations saved successfully with two different extractor", async () => {
+            const dataSource = await loadDataBase("twoObservation");
             const action = new ObservationEntityAction(dataSource);
             const repository = dataSource.getRepository(ObservationEntity);
             await repository.insert([{
@@ -67,13 +58,11 @@ describe("ObservationEntityAction", () => {
                 extractor: "first-extractor",
                 block: "1",
                 height: 1,
-                id: 1
             }, {
                 ...firstObservations[1],
                 extractor: "first-extractor",
                 block: "1",
                 height: 1,
-                id: 2
             }]);
             const [firstInsertRows, firstInsertRowsCount] = await repository.findAndCount();
             expect(firstInsertRowsCount).toEqual(2);
@@ -112,6 +101,7 @@ describe("ObservationEntityAction", () => {
          * Expected: storeObservations should returns true and last observation fields should update
          */
         it("checks that duplicated observation updated with same extractor", async () => {
+            const dataSource = await loadDataBase("duplicatedObservationUpdated");
             const action = new ObservationEntityAction(dataSource);
             const repository = dataSource.getRepository(ObservationEntity);
             await repository.insert([{
@@ -119,13 +109,11 @@ describe("ObservationEntityAction", () => {
                 extractor: "first-extractor",
                 block: "1",
                 height: 1,
-                id: 1
             }, {
                 ...firstObservations[1],
                 extractor: "first-extractor",
                 block: "1",
                 height: 1,
-                id: 2
             }]);
             const [firstInsertRows, firstInsertRowsCount] = await repository.findAndCount();
             expect(firstInsertRowsCount).toEqual(2);
@@ -165,13 +153,11 @@ describe("ObservationEntityAction", () => {
                 extractor: "first-extractor",
                 block: "1",
                 height: 1,
-                id: 1
             }, {
                 ...firstObservations[1],
                 extractor: "first-extractor",
                 block: "1",
                 height: 1,
-                id: 2
             }]);
             const [firstInsertRows, firstInsertRowsCount] = await repository.findAndCount();
             expect(firstInsertRowsCount).toEqual(2);
@@ -210,13 +196,11 @@ describe("ObservationEntityAction", () => {
                 extractor: "first-extractor",
                 block: "1",
                 height: 1,
-                id: 1
             }, {
                 ...firstObservations[1],
                 extractor: "first-extractor",
                 block: "1",
                 height: 1,
-                id: 2
             }]);
             const [firstInsertRows, firstInsertRowsCount] = await repository.findAndCount();
             expect(firstInsertRowsCount).toEqual(2);

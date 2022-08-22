@@ -22,7 +22,7 @@ export class networkModelMigration1658414485911 implements MigrationInterface{
                     "requestId" varchar NOT NULL, 
                     "block" varchar NOT NULL,
                     "extractor" varchar NOT NULL,
-                    CONSTRAINT "requestConstraint" UNIQUE ("requestId", "extractor")
+                    CONSTRAINT "UQ_a871fab5aa20b9306e13a057924" UNIQUE ("requestId", "extractor")
                 )`
         );
     }

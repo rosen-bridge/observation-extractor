@@ -2,7 +2,7 @@ import { Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 
 @Entity()
-@Unique("requestConstraint", ["requestId", "extractor"])
+@Unique(["requestId", "extractor"])
 export class ObservationEntity{
     @PrimaryGeneratedColumn()
     id: number
