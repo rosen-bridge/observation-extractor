@@ -27,20 +27,20 @@ describe("ObservationEntityAction", () => {
             const repository = await dataSource.getRepository(ObservationEntity);
             const [rows, rowsCount] = await repository.findAndCount();
             expect(rowsCount).toEqual(2);
-            expect(rows[0]).toEqual({
-                ...firstObservations[0],
-                block: "1",
-                extractor: "extractor-test",
-                height: 1,
-                id: 1
-            })
-            expect(rows[1]).toEqual({
-                ...firstObservations[1],
-                block: "1",
-                extractor: "extractor-test",
-                height: 1,
-                id: 2
-            })
+            expect(rows[0]).toEqual(expect.objectContaining({
+                    ...firstObservations[0],
+                    block: "1",
+                    extractor: "extractor-test",
+                    height: 1,
+                })
+            )
+            expect(rows[1]).toEqual(expect.objectContaining({
+                    ...firstObservations[1],
+                    block: "1",
+                    extractor: "extractor-test",
+                    height: 1,
+                })
+            )
         })
 
         /**
@@ -64,8 +64,6 @@ describe("ObservationEntityAction", () => {
                 block: "1",
                 height: 1,
             }]);
-            const [firstInsertRows, firstInsertRowsCount] = await repository.findAndCount();
-            expect(firstInsertRowsCount).toEqual(2);
             const res = await action.storeObservations(
                 secondObservations,
                 generateBlockEntity(dataSource, "1"),
@@ -74,22 +72,20 @@ describe("ObservationEntityAction", () => {
             expect(res).toEqual(true);
             const [secondInsertRows, secondInsertRowsCount] = await repository.findAndCount();
             expect(secondInsertRowsCount).toEqual(4);
-            expect(firstInsertRows[0]).toEqual(secondInsertRows[0]);
-            expect(firstInsertRows[1]).toEqual(secondInsertRows[1]);
-            expect(secondInsertRows[2]).toEqual({
-                ...secondObservations[0],
-                block: "1",
-                extractor: "second-extractor",
-                height: 1,
-                id: 3
-            })
-            expect(secondInsertRows[3]).toEqual({
-                ...secondObservations[1],
-                block: "1",
-                extractor: "second-extractor",
-                height: 1,
-                id: 4
-            })
+            expect(secondInsertRows[2]).toEqual(expect.objectContaining({
+                    ...secondObservations[0],
+                    block: "1",
+                    extractor: "second-extractor",
+                    height: 1,
+                })
+            )
+            expect(secondInsertRows[3]).toEqual(expect.objectContaining({
+                    ...secondObservations[1],
+                    block: "1",
+                    extractor: "second-extractor",
+                    height: 1,
+                })
+            )
 
         })
 
@@ -115,8 +111,6 @@ describe("ObservationEntityAction", () => {
                 block: "1",
                 height: 1,
             }]);
-            const [firstInsertRows, firstInsertRowsCount] = await repository.findAndCount();
-            expect(firstInsertRowsCount).toEqual(2);
             const res = await action.storeObservations(
                 [{...firstObservations[0], toAddress: "newAddress"}],
                 generateBlockEntity(dataSource, "1"),
@@ -125,14 +119,14 @@ describe("ObservationEntityAction", () => {
             expect(res).toEqual(true);
             const [secondInsertRows, secondInsertRowsCount] = await repository.findAndCount();
             expect(secondInsertRowsCount).toEqual(2);
-            expect(secondInsertRows[0]).toEqual({
-                ...firstObservations[0],
-                block: "1",
-                extractor: "first-extractor",
-                height: 1,
-                toAddress: "newAddress",
-                id: 1
-            });
+            expect(secondInsertRows[0]).toEqual(expect.objectContaining({
+                    ...firstObservations[0],
+                    block: "1",
+                    extractor: "first-extractor",
+                    height: 1,
+                    toAddress: "newAddress",
+                })
+            );
 
         })
 
@@ -159,8 +153,6 @@ describe("ObservationEntityAction", () => {
                 block: "1",
                 height: 1,
             }]);
-            const [firstInsertRows, firstInsertRowsCount] = await repository.findAndCount();
-            expect(firstInsertRowsCount).toEqual(2);
             const res = await action.storeObservations(
                 [{...firstObservations[0]}],
                 generateBlockEntity(dataSource, "1"),
@@ -169,13 +161,13 @@ describe("ObservationEntityAction", () => {
             expect(res).toEqual(true);
             const [secondInsertRows, secondInsertRowsCount] = await repository.findAndCount();
             expect(secondInsertRowsCount).toEqual(3);
-            expect(secondInsertRows[2]).toEqual({
-                ...firstObservations[0],
-                block: "1",
-                extractor: "second-extractor",
-                height: 1,
-                id: 3
-            });
+            expect(secondInsertRows[2]).toEqual(expect.objectContaining({
+                    ...firstObservations[0],
+                    block: "1",
+                    extractor: "second-extractor",
+                    height: 1,
+                })
+            );
 
         })
 
@@ -202,8 +194,6 @@ describe("ObservationEntityAction", () => {
                 block: "1",
                 height: 1,
             }]);
-            const [firstInsertRows, firstInsertRowsCount] = await repository.findAndCount();
-            expect(firstInsertRowsCount).toEqual(2);
             const res = await action.storeObservations(
                 [{...firstObservations[0], requestId: "reqId1-1"}],
                 generateBlockEntity(dataSource, "1"),
@@ -212,14 +202,14 @@ describe("ObservationEntityAction", () => {
             expect(res).toEqual(true);
             const [secondInsertRows, secondInsertRowsCount] = await repository.findAndCount();
             expect(secondInsertRowsCount).toEqual(3);
-            expect(secondInsertRows[2]).toEqual({
-                ...firstObservations[0],
-                block: "1",
-                extractor: "first-extractor",
-                height: 1,
-                requestId: "reqId1-1",
-                id: 3
-            });
+            expect(secondInsertRows[2]).toEqual(expect.objectContaining({
+                    ...firstObservations[0],
+                    block: "1",
+                    extractor: "first-extractor",
+                    height: 1,
+                    requestId: "reqId1-1",
+                })
+            );
 
         })
 
