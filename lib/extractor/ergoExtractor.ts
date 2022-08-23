@@ -12,10 +12,12 @@ export class ErgoObservationExtractor extends AbstractExtractor<wasm.Transaction
     private readonly dataSource: DataSource;
     private readonly tokens: TokenMap;
     private readonly actions: ObservationEntityAction;
+    private readonly bankErgoTree: string;
     static readonly FROM_CHAIN: string = "ergo";
 
-    constructor(dataSource: DataSource, tokens: RosenTokens) {
+    constructor(dataSource: DataSource, tokens: RosenTokens, address: string) {
         super()
+        this.bankErgoTree = wasm.Address.from_base58(address).to_ergo_tree().to_base16_bytes();
         this.dataSource = dataSource;
         this.tokens = new TokenMap(tokens);
         this.actions = new ObservationEntityAction(dataSource);
@@ -76,7 +78,7 @@ export class ErgoObservationExtractor extends AbstractExtractor<wasm.Transaction
                     for (let index = 0; index < transaction.outputs().len(); index++) {
                         const output = transaction.outputs().get(index);
                         const data = this.getRosenData(output);
-                        if (data !== undefined) {
+                        if (output.ergo_tree().to_base16_bytes() === this.bankErgoTree && data !== undefined) {
                             const token = output.tokens().get(0);
                             const inputAddress = "fromAddress";
                             const requestId = Buffer.from(blake2b(output.tx_id().to_str(), undefined, 32)).toString("hex");

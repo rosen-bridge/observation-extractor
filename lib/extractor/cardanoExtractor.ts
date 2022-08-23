@@ -12,10 +12,12 @@ export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransact
     private readonly dataSource: DataSource;
     private readonly tokens: TokenMap;
     private readonly actions: ObservationEntityAction;
+    private readonly bankAddress: string;
     static readonly FROM_CHAIN: string = "cardano";
 
-    constructor(dataSource: DataSource, tokens: RosenTokens) {
+    constructor(dataSource: DataSource, tokens: RosenTokens, address: string) {
         super()
+        this.bankAddress = address;
         this.dataSource = dataSource;
         this.tokens = new TokenMap(tokens);
         this.actions = new ObservationEntityAction(dataSource);
@@ -86,7 +88,8 @@ export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransact
                         if (transaction.metadata !== undefined) {
                             const data = this.getRosenData(transaction.metadata);
                             if (
-                                data !== undefined
+                                transaction.outputs[0].payment_addr.bech32 === this.bankAddress
+                                && data !== undefined
                                 && transaction.outputs[0].asset_list.length !== 0
                             ) {
                                 const asset = transaction.outputs[0].asset_list[0];

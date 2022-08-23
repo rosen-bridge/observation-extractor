@@ -339,9 +339,10 @@ export const clearDB = async (dataSource: DataSource) => {
 
 export const observationTxGenerator = (
     hasToken = true,
-    data: Array<string> = ["cardano", "address", "10000", "1000"]
+    data: Array<string> = ["cardano", "address", "10000", "1000"],
+    outputAddressSK: string,
 ) => {
-    const sk = wasm.SecretKey.random_dlog();
+    const sk = wasm.SecretKey.dlog_from_bytes(Uint8Array.from(Buffer.from(outputAddressSK, 'hex')));
     const address = wasm.Contract.pay_to_address(sk.get_address());
     const outBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str("100000000"));
     const outBoxBuilder = new wasm.ErgoBoxCandidateBuilder(

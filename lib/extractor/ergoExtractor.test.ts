@@ -8,6 +8,9 @@ import { blake2b } from "blakejs";
 class ExtractorErgo extends ErgoObservationExtractor{
 }
 
+const bankAddress = "9f53ZBeKFk3VKS4KPj1Lap96BKFSw8zfdWb4FHYZH6qBBV6p9ZS";
+const bankSK = "f133100250abf1494e9ff5a0f998dc2fea7a5aa35641454ba723c913bff0e8fa";
+
 describe('extractorErgo', () => {
     describe('processTransactions', () => {
 
@@ -20,9 +23,9 @@ describe('extractorErgo', () => {
          */
         it('checks valid transaction', async () => {
             const dataSource = await loadDataBase("processTransactionErgo");
-            const extractor = new ExtractorErgo(dataSource, tokens);
-            const Tx1 = observationTxGenerator();
-            const Tx3 = observationTxGenerator(false);
+            const extractor = new ExtractorErgo(dataSource, tokens, bankAddress);
+            const Tx1 = observationTxGenerator(true, ["cardano", "address", "10000", "1000"], bankSK);
+            const Tx3 = observationTxGenerator(false, ["cardano", "address", "10000", "1000"], bankSK);
             const res = await extractor.processTransactions([Tx1, Tx3], generateBlockEntity(dataSource, "1"));
             expect(res).toBeTruthy();
             const repository = dataSource.getRepository(ObservationEntity);
@@ -50,6 +53,23 @@ describe('extractorErgo', () => {
             });
         })
 
+        /**
+         * 1 Valid Transaction but invalid bankAddress should not save
+         * Dependency: action.storeObservations
+         * Scenario: one valid observation with invalid bankAddress should not save in the database
+         * Expected: processTransactions should returns true and database row count should be 0
+         */
+        it('checks observation with invalid bankAddress should not saved', async () => {
+            const dataSource = await loadDataBase("processTransactionErgo-invalidBankAddress");
+            const extractor = new ExtractorErgo(dataSource, tokens, "9gDQ7emWoxJkAHW8kSwniCkDa43G2w9LCL9voHgfj2AvXfFSQ8i");
+            const Tx1 = observationTxGenerator(true, ["cardano", "address", "10000", "1000"], bankSK);
+            const res = await extractor.processTransactions([Tx1,], generateBlockEntity(dataSource, "1"));
+            expect(res).toEqual(true);
+            const repository = dataSource.getRepository(ObservationEntity);
+            const [, rowsCount] = await repository.findAndCount();
+            expect(rowsCount).toEqual(0);
+        })
+
     })
 
     describe('getRosenData', () => {
@@ -62,8 +82,8 @@ describe('extractorErgo', () => {
          */
         it('valid rosen transaction', async () => {
             const dataSource = await loadDataBase("getRosenData-ergo");
-            const extractor = new ExtractorErgo(dataSource, tokens);
-            const Tx = observationTxGenerator();
+            const extractor = new ExtractorErgo(dataSource, tokens, bankAddress);
+            const Tx = observationTxGenerator(true, ["cardano", "address", "10000", "1000"], bankSK);
             expect(extractor.getRosenData(Tx.outputs().get(0))).toStrictEqual({
                 toChain: 'cardano',
                 toAddress: 'address',
@@ -80,8 +100,8 @@ describe('extractorErgo', () => {
          */
         it('checks transaction without token', async () => {
             const dataSource = await loadDataBase("getRosenData");
-            const extractor = new ExtractorErgo(dataSource, tokens);
-            const Tx = observationTxGenerator(false);
+            const extractor = new ExtractorErgo(dataSource, tokens, bankAddress);
+            const Tx = observationTxGenerator(false, [], bankSK);
             expect(extractor.getRosenData(Tx.outputs().get(0))).toEqual(undefined)
         })
 
@@ -93,8 +113,8 @@ describe('extractorErgo', () => {
          */
         it('checks transaction without valid register value', async () => {
             const dataSource = await loadDataBase("getRosenData");
-            const extractor = new ExtractorErgo(dataSource, tokens);
-            const Tx = observationTxGenerator(true, ["Cardano", "address", "10000"]);
+            const extractor = new ExtractorErgo(dataSource, tokens, bankAddress);
+            const Tx = observationTxGenerator(true, ["Cardano", "address", "10000"], bankSK);
             expect(extractor.getRosenData(Tx.outputs().get(0))).toEqual(undefined)
         })
     })

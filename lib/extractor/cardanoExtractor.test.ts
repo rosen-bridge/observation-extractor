@@ -9,6 +9,8 @@ import { blake2b } from "blakejs";
 class ExecutorCardano extends CardanoObservationExtractor{
 }
 
+const bankAddress = "addr_test1vze7yqqlg8cjlyhz7jzvsg0f3fhxpuu6m3llxrajfzqecggw704re";
+
 describe("cardanoKoiosObservationExtractor", () => {
     describe('getRosenData', () => {
 
@@ -20,7 +22,7 @@ describe("cardanoKoiosObservationExtractor", () => {
          */
         it('checks valid rosenData', async () => {
             const dataSource = await loadDataBase("getRosenData-cardano");
-            const extractor = new ExecutorCardano(dataSource, tokens);
+            const extractor = new ExecutorCardano(dataSource, tokens, bankAddress);
             expect(extractor.getRosenData([{
                     key: "0",
                     json: JSON.parse(
@@ -49,7 +51,7 @@ describe("cardanoKoiosObservationExtractor", () => {
          */
         it('checks invalid rosen data', async () => {
             const dataSource = await loadDataBase("getRosenData-cardano");
-            const extractor = new ExecutorCardano(dataSource, tokens);
+            const extractor = new ExecutorCardano(dataSource, tokens, bankAddress);
             expect(extractor.getRosenData([{
                     key: "0",
                     json: JSON.parse(
@@ -75,7 +77,7 @@ describe("cardanoKoiosObservationExtractor", () => {
     describe('processTransactionsCardano', () => {
         it('should returns true valid rosen transaction', async () => {
             const dataSource = await loadDataBase("processTransactionCardano-valid-cardano");
-            const extractor = new ExecutorCardano(dataSource, tokens);
+            const extractor = new ExecutorCardano(dataSource, tokens, bankAddress);
             const Tx: KoiosTransaction = cardanoTxValid;
             const res = await extractor.processTransactions([Tx], generateBlockEntity(dataSource, "1"));
             expect(res).toEqual(true);
@@ -105,6 +107,24 @@ describe("cardanoKoiosObservationExtractor", () => {
         })
 
         /**
+         * one valid transaction to the wrong bank Address should not save in database
+         * Dependency: action.storeObservations
+         * Scenario: no observation should save
+         * Expected: processTransactions should returns true and database row count should be 0
+         */
+        it('database row count should be zero because of invalid bankAddress', async () => {
+            const dataSource = await loadDataBase("processTransactionCardano-invalid-cardano");
+            const extractor = new ExecutorCardano(dataSource, tokens, "addr_test1qq5qeusgymq8ledv9gltp9fuh5jchetjeafha75n6dghur4gtzcgx");
+            const Tx: KoiosTransaction = cardanoTxValid;
+            const res = await extractor.processTransactions([Tx], generateBlockEntity(dataSource, "1"));
+            expect(res).toEqual(true);
+            const repository = dataSource.getRepository(ObservationEntity);
+            const [, rowsCount] = await repository.findAndCount();
+            expect(rowsCount).toEqual(0);
+        })
+
+
+        /**
          * zero Valid Transaction should save successfully
          * Dependency: action.storeObservations
          * Scenario: zero observation should save successfully
@@ -112,7 +132,7 @@ describe("cardanoKoiosObservationExtractor", () => {
          */
         it('should returns false invalid rosen metadata', async () => {
             const dataSource = await loadDataBase("processTransactionCardano-invalid-cardano");
-            const extractor = new ExecutorCardano(dataSource, tokens);
+            const extractor = new ExecutorCardano(dataSource, tokens, bankAddress);
             const Tx: KoiosTransaction = {
                 ...cardanoTxValid,
                 metadata: [{
