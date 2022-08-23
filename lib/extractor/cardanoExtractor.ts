@@ -87,28 +87,30 @@ export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransact
                     txs.forEach(transaction => {
                         if (transaction.metadata !== undefined) {
                             const data = this.getRosenData(transaction.metadata);
-                            if (
-                                transaction.outputs[0].payment_addr.bech32 === this.bankAddress
-                                && data !== undefined
-                                && transaction.outputs[0].asset_list.length !== 0
-                            ) {
-                                const asset = transaction.outputs[0].asset_list[0];
-                                const assetId = this.toTargetToken(asset.policy_id, asset.asset_name, data.toChain);
-                                const requestId = Buffer.from(blake2b(transaction.tx_hash, undefined, 32)).toString("hex")
-                                observations.push({
-                                    fromChain: CardanoObservationExtractor.FROM_CHAIN,
-                                    toChain: data.toChain,
-                                    amount: asset.quantity,
-                                    sourceChainTokenId: assetId.fromChain,
-                                    targetChainTokenId: assetId.toChain,
-                                    sourceTxId: transaction.tx_hash,
-                                    bridgeFee: data.bridgeFee,
-                                    networkFee: data.networkFee,
-                                    sourceBlockId: block.hash,
-                                    requestId: requestId,
-                                    toAddress: data.toAddress,
-                                    fromAddress: transaction.inputs[0].payment_addr.bech32
-                                })
+                            for (let index = 0; index < transaction.outputs.length; index++) {
+                                if (
+                                    transaction.outputs[index].payment_addr.bech32 === this.bankAddress
+                                    && data !== undefined
+                                    && transaction.outputs[index].asset_list.length !== 0
+                                ) {
+                                    const asset = transaction.outputs[index].asset_list[0];
+                                    const assetId = this.toTargetToken(asset.policy_id, asset.asset_name, data.toChain);
+                                    const requestId = Buffer.from(blake2b(transaction.tx_hash, undefined, 32)).toString("hex")
+                                    observations.push({
+                                        fromChain: CardanoObservationExtractor.FROM_CHAIN,
+                                        toChain: data.toChain,
+                                        amount: asset.quantity,
+                                        sourceChainTokenId: assetId.fromChain,
+                                        targetChainTokenId: assetId.toChain,
+                                        sourceTxId: transaction.tx_hash,
+                                        bridgeFee: data.bridgeFee,
+                                        networkFee: data.networkFee,
+                                        sourceBlockId: block.hash,
+                                        requestId: requestId,
+                                        toAddress: data.toAddress,
+                                        fromAddress: transaction.inputs[0].payment_addr.bech32
+                                    })
+                                }
                             }
 
                         }

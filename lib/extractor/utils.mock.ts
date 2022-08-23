@@ -279,22 +279,6 @@ export const cardanoTxValid = {
     ],
     outputs: [{
         payment_addr: {
-            bech32: 'addr_test1vze7yqqlg8cjlyhz7jzvsg0f3fhxpuu6m3llxrajfzqecggw704re',
-            cred: "b3e2001f41f12f92e2f484c821e98a6e60f39adc7ff30fb248819c21"
-        },
-        tx_hash: 'cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa',
-        stake_addr: null,
-        tx_index: 0,
-        value: '10000000',
-        asset_list: [
-            {
-                policy_id: 'ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2',
-                asset_name: '7369676d61',
-                quantity: '10'
-            }
-        ]
-    }, {
-        payment_addr: {
             bech32: 'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0',
             cred: "90ff35400c4d2cbddef24a750ad7064947a2461c1a0b9ca431c7e9f6"
         },
@@ -312,6 +296,22 @@ export const cardanoTxValid = {
                 policy_id: 'ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2',
                 asset_name: '7369676d61',
                 quantity: '9999968'
+            }
+        ]
+    }, {
+        payment_addr: {
+            bech32: 'addr_test1vze7yqqlg8cjlyhz7jzvsg0f3fhxpuu6m3llxrajfzqecggw704re',
+            cred: "b3e2001f41f12f92e2f484c821e98a6e60f39adc7ff30fb248819c21"
+        },
+        tx_hash: 'cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa',
+        stake_addr: null,
+        tx_index: 0,
+        value: '10000000',
+        asset_list: [
+            {
+                policy_id: 'ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2',
+                asset_name: '7369676d61',
+                quantity: '10'
             }
         ]
     }]
