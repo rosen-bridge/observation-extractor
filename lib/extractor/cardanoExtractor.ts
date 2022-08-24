@@ -65,8 +65,8 @@ export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransact
      */
     toTargetToken = (policyId: string, assetName: string, toChain: string): { fromChain: string, toChain: string } => {
         const tokens = this.tokens.search(CardanoObservationExtractor.FROM_CHAIN, {
-            assetName: assetName,
-            policyId: policyId
+            asset_name: assetName,
+            policy_id: policyId
         })[0];
         return {
             fromChain: this.tokens.getID(tokens, CardanoObservationExtractor.FROM_CHAIN),
@@ -118,7 +118,7 @@ export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransact
                     this.actions.storeObservations(observations, block, this.getId()).then(() => {
                         resolve(true)
                     }).catch((e) => {
-                        console.log(`An error occured during store observations: ${e}`)
+                        console.log(`An error occurred during store observations: ${e}`)
                         reject(e)
                     })
                 } catch
