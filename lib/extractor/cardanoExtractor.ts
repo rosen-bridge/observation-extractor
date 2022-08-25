@@ -34,25 +34,29 @@ export class CardanoObservationExtractor extends AbstractExtractor<KoiosTransact
      */
     getRosenData = (metaDataArray: Array<MetaData>): RosenData | undefined => {
         if (metaDataArray.length > 0 && metaDataArray[0].key === "0") {
-            const metaData = metaDataArray[0].json;
-            if ('to' in metaData
-                && 'bridgeFee' in metaData
-                && 'networkFee' in metaData
-                && 'toAddress' in metaData) {
-                const rosenData = metaData as unknown as {
-                    to: string;
-                    bridgeFee: string;
-                    networkFee: string;
-                    toAddress: string;
+            try {
+                const metaData = metaDataArray[0].json;
+                if ('to' in metaData
+                    && 'bridgeFee' in metaData
+                    && 'networkFee' in metaData
+                    && 'toAddress' in metaData) {
+                    const rosenData = metaData as unknown as {
+                        to: string;
+                        bridgeFee: string;
+                        networkFee: string;
+                        toAddress: string;
+                    }
+                    return {
+                        toChain: rosenData.to,
+                        bridgeFee: rosenData.bridgeFee,
+                        networkFee: rosenData.networkFee,
+                        toAddress: rosenData.toAddress
+                    }
                 }
-                return {
-                    toChain: rosenData.to,
-                    bridgeFee: rosenData.bridgeFee,
-                    networkFee: rosenData.networkFee,
-                    toAddress: rosenData.toAddress
-                }
+                return undefined
+            } catch {
+                return undefined
             }
-            return undefined
         }
         return undefined
     }
