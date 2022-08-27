@@ -4,7 +4,7 @@
 ### Table of Contents
 - [Description](#description)  
 - [Related Projects](#related-projects)
-- [How to Use the Address Extractor](#how-to-use-the-address-extractor)
+- [How to Use the Observation Extractor](#how-to-use-the-observation-extractor)
     - [Install](#install)
     - [Usage](#usage)
 - [Contributing](#contributing)
@@ -18,7 +18,9 @@ Data extractors are modules that are integrated within a scanner. They drive the
  
 ## Related Projects
 This module is used within the [Scanner](https://github.com/rosen-bridge/scanner) project. The address scanner is currently used in the [Watcher](https://github.com/rosen-bridge/watcher) service to drive the valid source chain observations.
-## How to Use the Address Extractor
+
+
+## How to Use the Observation Extractor
 ### Install
 This project is written in node-js using Esnext module and typeorm database. This project is not dependent and is used as the scanner module. You can easily install it using npm with the command:
  
