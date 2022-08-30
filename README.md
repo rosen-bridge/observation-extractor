@@ -13,7 +13,7 @@
 <a name="headers"/>
 
 ## Description
-Data extractors are modules that are integrated within a scanner. They drive the required information from the scanned blocks and store them in their own database. The observation extractor is designed to fulfill a watcher's main task: observing user payments in source networks. The bridge payment transaction has its own structure, and the observation extractor searches for this pattern occurrence in source chains and stores all needed information for a watcher commitment creation and reveal.
+Data extractors are modules that are integrated within a scanner. They drive the required information from the scanned blocks and store them in their own database. The observation extractor is designed to fulfill a watcher's main task: observing user payments in source networks. The bridge payment transaction has its own structure, and the observation extractor searches for this pattern occurrence in source chains and stores all needed information for a watcher commitment creation and revealment.
  
  
 ## Related Projects
@@ -22,7 +22,7 @@ This module is used within the [Scanner](https://github.com/rosen-bridge/scanner
 
 ## How to Use the Observation Extractor
 ### Install
-This project is written in node-js using Esnext module and typeorm database. This project is not dependent and is used as the scanner module. You can easily install it using npm with the command:
+This project is written in node-js using Esnext module and typeorm database. Extractors are not standalone projects and should be used as scanner modules. You can easily install it using npm with the command:
  
 ```shell
 npm install @rosen-bridge/observation-extractor
